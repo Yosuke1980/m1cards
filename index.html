@@ -856,7 +856,7 @@ function answerQuiz(btn, ok){
   else{ qStreak = 0; btn.classList.add('wrong'); }
   quizStatus();
   const cap = ok && qStreak>=2 ? '🔥'+qStreak+'れんぞく!' : '';
-  emikuji(ok ? 'せいかい!' : 'ざんねん…', ()=>{
+  emikuji(ok ? 'せいかい' : 'ざんねん…', ()=>{
     if(ok){
       $('card').classList.add('flash');
       setTimeout(()=>$('card').classList.remove('flash'), 550);
