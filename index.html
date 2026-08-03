@@ -307,6 +307,99 @@ body.quiz-mode .filters button[data-f="審査員"]{display:none;}
 @keyframes confFall{
   to{transform:translateY(108vh) rotate(720deg);opacity:.85;}
 }
+.votes{
+  display:flex;flex-wrap:wrap;gap:8px;justify-content:center;
+  max-width:560px;margin:0 auto;
+}
+.vote-panel{width:96px;height:64px;perspective:420px;display:block;}
+.vp-inner{
+  position:relative;display:block;width:100%;height:100%;
+  transform-style:preserve-3d;transform:rotateY(0);
+  animation:vpFlip .55s ease forwards;
+}
+@keyframes vpFlip{to{transform:rotateY(180deg);}}
+.vp-front,.vp-back{
+  position:absolute;inset:0;backface-visibility:hidden;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:6px;font-weight:900;
+}
+.vp-front{
+  background:linear-gradient(180deg,#2a262e,#1b191e);
+  border:1px solid var(--line);
+  color:var(--text-dim);font-size:22px;
+}
+.vp-back{
+  transform:rotateY(180deg);
+  font-size:12px;line-height:1.5;text-align:center;padding:4px;
+  background:#221f25;border:1px solid var(--line);color:var(--text);
+}
+.vote-panel.win .vp-back{
+  background:linear-gradient(180deg,#3a2f14,#241c0c);
+  border-color:var(--gold);color:var(--gold);
+  box-shadow:0 0 12px rgba(217,164,65,.4);
+}
+.votes-sum{
+  display:block;font-size:13px;font-weight:400;
+  color:var(--text-dim);margin-top:16px;line-height:2;
+}
+.emikuji-overlay{
+  position:absolute;inset:0;z-index:6;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(17,16,19,.92);
+}
+.emi-wrap{position:relative;width:200px;height:240px;}
+.emi-box{
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:180px;height:80px;
+  background:linear-gradient(180deg,#5c3a1e,#3a2412);
+  border:2px solid #7a5327;border-radius:8px 8px 4px 4px;
+  box-shadow:0 8px 20px rgba(0,0,0,.5);
+  animation:emiShake .35s ease;
+}
+.emi-box::before{
+  content:"えみくじ";
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  font-size:14px;font-weight:900;color:var(--gold);letter-spacing:.2em;white-space:nowrap;
+}
+@keyframes emiShake{
+  0%,100%{transform:translateX(-50%);}
+  25%{transform:translateX(calc(-50% - 5px)) rotate(-1.5deg);}
+  75%{transform:translateX(calc(-50% + 5px)) rotate(1.5deg);}
+}
+.emi-stick{
+  position:absolute;bottom:62px;left:50%;
+  width:48px;height:160px;margin-left:-24px;
+  perspective:500px;
+  animation:emiRise .5s .3s cubic-bezier(.2,1.3,.5,1) both;
+}
+@keyframes emiRise{
+  0%{transform:translateY(130px);opacity:0;}
+  40%{opacity:1;}
+  100%{transform:translateY(0);opacity:1;}
+}
+.emi-inner{
+  position:relative;display:block;width:100%;height:100%;
+  transform-style:preserve-3d;
+  animation:emiFlip .45s .95s ease forwards;
+}
+@keyframes emiFlip{to{transform:rotateY(180deg);}}
+.emi-face{
+  position:absolute;inset:0;backface-visibility:hidden;
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  writing-mode:vertical-rl;
+  font-weight:900;letter-spacing:.15em;
+}
+.emi-face ruby{writing-mode:vertical-rl;}
+.emi-front{
+  background:linear-gradient(180deg,#d1352b,#8f1f18);
+  border:2px solid var(--gold);color:#fff;font-size:16px;
+}
+.emi-back{
+  transform:rotateY(180deg);
+  background:linear-gradient(180deg,#2c2830,#1b191e);
+  border:2px solid var(--gold);color:var(--gold);font-size:15px;
+}
 .shake{animation:shake .4s;}
 @keyframes shake{
   0%,100%{transform:translateX(0);}
@@ -379,6 +472,8 @@ body.quiz-mode .filters button[data-f="審査員"]{display:none;}
 }
 @media (prefers-reduced-motion: reduce){
   *{transition:none !important;animation:none !important;}
+  .vp-inner{transform:rotateY(180deg);}
+  .emi-inner{transform:rotateY(180deg);}
 }
 </style>
 </head>
@@ -429,7 +524,7 @@ body.quiz-mode .filters button[data-f="審査員"]{display:none;}
   <button onclick="next()">つぎへ →</button>
   <button class="gold" onclick="toggleLearned()">おぼえた ✓</button>
   <button class="fight" onclick="toggleHard()">がんばれ 💪</button>
-  <button onclick="shuffleCards()">シャッフル</button>
+  <button onclick="emikujiDraw()">えみくじ 🎋</button>
   <button onclick="resetLearned()">きろくリセット</button>
 </div>
 
@@ -451,16 +546,16 @@ const years = [
 {kai:8, y:2008, win:"NON STYLE[ノンスタイル]", ten:"644点[てん]", ban:"7番[ばん]", hyo:"5票[ひょう]", ni:"オードリー(2票[ひょう]・敗者復活[はいしゃふっかつ])", san:"ナイツ(0票[ひょう])"},
 {kai:9, y:2009, win:"パンクブーブー", ten:"651点[てん]", ban:"8番[ばん]", hyo:"7票[ひょう](全員[ぜんいん]!)", ni:"笑[わら]い飯[めし](0票[ひょう])", san:"NON STYLE[ノンスタイル](0票[ひょう])"},
 {kai:10, y:2010, win:"笑[わら]い飯[めし]", ten:"668点[てん]", ban:"6番[ばん]", hyo:"4票[ひょう]", ni:"スリムクラブ(3票[ひょう])", san:"パンクブーブー(0票[ひょう])"},
-{kai:11, y:2015, win:"トレンディエンジェル", ten:null, ban:null, hyo:null, ni:"銀[ぎん]シャリ", san:"ジャルジャル"},
+{kai:11, y:2015, win:"トレンディエンジェル", ten:null, ban:null, hyo:"6票[ひょう]", ni:"銀[ぎん]シャリ(2票[ひょう])", san:"ジャルジャル(1票[ひょう])"},
 {kai:12, y:2016, win:"銀[ぎん]シャリ", ten:"470点[てん](500点[てん]満点[まんてん])", ban:null, hyo:"3票[ひょう]", ni:"和牛[わぎゅう](1票[ひょう])", san:"スーパーマラドーナ(1票[ひょう])"},
-{kai:13, y:2017, win:"とろサーモン", ten:null, ban:null, hyo:null, ni:"和牛[わぎゅう]", san:"ミキ"},
-{kai:14, y:2018, win:"霜降[しもふ]り明星[みょうじょう]", ten:"662点[てん]", ban:null, hyo:null, ni:"和牛[わぎゅう]", san:"ジャルジャル"},
-{kai:15, y:2019, win:"ミルクボーイ", ten:"681点[てん](歴代[れきだい]1位[い]!)", ban:null, hyo:null, ni:"かまいたち", san:"ぺこぱ"},
-{kai:16, y:2020, win:"マヂカルラブリー", ten:"649点[てん]", ban:null, hyo:"3票[ひょう]", ni:"おいでやすこが", san:"見取[みと]り図[ず]"},
+{kai:13, y:2017, win:"とろサーモン", ten:null, ban:null, hyo:"4票[ひょう]", ni:"和牛[わぎゅう](3票[ひょう])", san:"ミキ(0票[ひょう])"},
+{kai:14, y:2018, win:"霜降[しもふ]り明星[みょうじょう]", ten:"662点[てん]", ban:null, hyo:"4票[ひょう]", ni:"和牛[わぎゅう](3票[ひょう])", san:"ジャルジャル(0票[ひょう])"},
+{kai:15, y:2019, win:"ミルクボーイ", ten:"681点[てん](歴代[れきだい]1位[い]!)", ban:null, hyo:"6票[ひょう]", ni:"かまいたち(1票[ひょう])", san:"ぺこぱ(0票[ひょう])"},
+{kai:16, y:2020, win:"マヂカルラブリー", ten:"649点[てん]", ban:null, hyo:"3票[ひょう]", ni:"おいでやすこが(2票[ひょう])", san:"見取[みと]り図[ず](2票[ひょう])"},
 {kai:17, y:2021, win:"錦鯉[にしきごい]", ten:"655点[てん]", ban:null, hyo:"5票[ひょう]", ni:"オズワルド(1票[ひょう])", san:"インディアンス(1票[ひょう])"},
 {kai:18, y:2022, win:"ウエストランド", ten:"659点[てん]", ban:null, hyo:"6票[ひょう]", ni:"さや香[か](1票[ひょう])", san:"ロングコートダディ(0票[ひょう])"},
-{kai:19, y:2023, win:"令和[れいわ]ロマン", ten:null, ban:"1番[ばん](トップバッター)", hyo:null, ni:"ヤーレンズ", san:"さや香[か]"},
-{kai:20, y:2024, win:"令和[れいわ]ロマン", ten:"850点[てん](900点[てん]満点[まんてん])", ban:"1番[ばん](トップバッター)", hyo:"5票[ひょう]", ni:"バッテリィズ", san:"真空[しんくう]ジェシカ"},
+{kai:19, y:2023, win:"令和[れいわ]ロマン", ten:null, ban:"1番[ばん](トップバッター)", hyo:"4票[ひょう]", ni:"ヤーレンズ(3票[ひょう])", san:"さや香[か](0票[ひょう])"},
+{kai:20, y:2024, win:"令和[れいわ]ロマン", ten:"850点[てん](900点[てん]満点[まんてん])", ban:"1番[ばん](トップバッター)", hyo:"5票[ひょう]", ni:"バッテリィズ(3票[ひょう])", san:"真空[しんくう]ジェシカ(1票[ひょう])"},
 {kai:21, y:2025, win:"たくろう", ten:"861点[てん](900点[てん]満点[まんてん])", ban:null, hyo:"8票[ひょう]", ni:"ドンデコルテ(1票[ひょう])", san:"エバース(0票[ひょう])"}
 ];
 
@@ -552,7 +647,14 @@ const cards = [];
 years.forEach(d=>{
   cards.push({c:"優勝", q:`${d.y}年[ねん]の優勝[ゆうしょう]は?`, a:d.win});
   if(d.ban) cards.push({c:"出番・票", q:`${d.y}年[ねん]、${d.win}の出番[でばん]は?`, a:d.ban});
-  if(d.hyo) cards.push({c:"出番・票", q:`${d.y}年[ねん]の最終決戦[さいしゅうけっせん]、${d.win}は何票[なんびょう]?`, a:d.hyo});
+  if(d.hyo){
+    const votes = [{n:d.win, w:true, v:parseInt(d.hyo)}];
+    [d.ni, d.san].forEach(s=>{
+      const m = s && s.match(/\((\d+)票/);
+      if(m) votes.push({n:s.replace(/\(.*$/,''), w:false, v:+m[1]});
+    });
+    cards.push({c:"出番・票", q:`${d.y}年[ねん]の最終決戦[さいしゅうけっせん]、${d.win}は何票[なんびょう]?`, a:d.hyo, votes});
+  }
   if(judges[d.y]){
     const n = judges[d.y].split("\n").length;
     cards.push({c:"審査員", q:`${d.y}年[ねん]の審査員[しんさいん](${n}人[にん])は?`, a:judges[d.y]});
@@ -649,8 +751,13 @@ function renderCard(){
   $('cat').innerHTML = rubyfy(catLabels[c.c] || c.c);
   $('side-label').textContent = showAnswer ? 'こたえ' : 'もんだい';
   const txt = showAnswer ? c.a : c.q;
-  $('card-text').innerHTML = rubyfy(txt);
-  $('card-text').style.fontSize = (showAnswer && txt.length > 60) ? '19px' : '';
+  if(showAnswer && c.votes){
+    $('card-text').innerHTML = voteRevealHTML(c.votes);
+    $('card-text').style.fontSize = '';
+  }else{
+    $('card-text').innerHTML = rubyfy(txt);
+    $('card-text').style.fontSize = (showAnswer && txt.length > 60) ? '19px' : '';
+  }
   $('card-note').textContent = showAnswer ? 'タップかクリックでもんだいにもどる' : 'タップかクリックでこたえ';
   $('card').classList.toggle('answer', showAnswer);
   $('card').classList.toggle('is-learned', learned.has(ci));
@@ -764,7 +871,11 @@ function answerQuiz(btn, ok){
     setTimeout(()=>$('card').classList.remove('shake'), 500);
   }
   quizStatus();
-  setTimeout(()=>{ idx=(idx+1)%pool.length; render(); }, ok?900:1800);
+  setTimeout(()=>{
+    const nx = (idx+1)%pool.length;
+    const c2 = cards[pool[nx]];
+    emikuji(catLabels[c2.c] || c2.c, ()=>{ idx=nx; render(); });
+  }, ok?900:1800);
 }
 
 function showVerdict(ok){
@@ -789,6 +900,52 @@ function confetti(n){
     document.body.appendChild(s);
     setTimeout(()=>s.remove(), 3200);
   }
+}
+
+function voteRevealHTML(votes){
+  const seq = [];
+  votes.forEach(v=>{ for(let i=0;i<v.v;i++) seq.push(v); });
+  for(let i=seq.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [seq[i],seq[j]]=[seq[j],seq[i]];
+  }
+  const li = seq.map(s=>s.w).lastIndexOf(true);
+  if(li>=0){ const t=seq[li]; seq.splice(li,1); seq.push(t); }
+  let h = '<span class="votes">';
+  seq.forEach((s,i)=>{
+    h += '<span class="vote-panel'+(s.w?' win':'')+'">'+
+         '<span class="vp-inner" style="animation-delay:'+(0.4+i*0.4)+'s">'+
+         '<span class="vp-front">?</span>'+
+         '<span class="vp-back">'+rubyfy(s.n)+'</span>'+
+         '</span></span>';
+  });
+  h += '</span><span class="votes-sum">'+
+    votes.map(v=>(v.w?'👑':'')+rubyfy(v.n)+' '+v.v+'<ruby>票<rt>ひょう</rt></ruby>').join('　')+
+    '</span>';
+  return h;
+}
+
+function emikuji(label, done){
+  const o = document.createElement('div');
+  o.className = 'emikuji-overlay';
+  o.innerHTML = '<div class="emi-wrap">'+
+    '<div class="emi-stick"><div class="emi-inner">'+
+    '<div class="emi-face emi-front">えみくじ</div>'+
+    '<div class="emi-face emi-back">'+rubyfy(label)+'</div>'+
+    '</div></div>'+
+    '<div class="emi-box"></div>'+
+    '</div>';
+  $('card').appendChild(o);
+  setTimeout(()=>{ o.remove(); if(done) done(); }, 1650);
+}
+
+function emikujiDraw(){
+  if(document.querySelector('.emikuji-overlay')) return;
+  const target = Math.floor(Math.random()*pool.length);
+  const c = cards[pool[target]];
+  emikuji(catLabels[c.c] || c.c, ()=>{
+    idx = target; showAnswer = false; render();
+  });
 }
 
 function flip(){ if(mode==='quiz') return; showAnswer = !showAnswer; render(); }
