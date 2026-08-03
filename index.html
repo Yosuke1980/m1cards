@@ -273,32 +273,6 @@ body.quiz-mode .filters button[data-f="審査員"]{display:none;}
 .choices button.correct{background:#2f7d4a;border-color:#2f7d4a;color:#fff;}
 .choices button.wrong{background:var(--red-deep);border-color:var(--red-deep);color:#fff;}
 .choices button:disabled{cursor:default;}
-.verdict{
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
-  pointer-events:none;z-index:5;
-  background:radial-gradient(ellipse 60% 50% at 50% 50%, rgba(17,16,19,.82), rgba(17,16,19,.35));
-}
-.verdict .big{
-  font-size:60px;font-weight:900;letter-spacing:.08em;
-  color:var(--gold);
-  text-shadow:0 0 26px rgba(217,164,65,.65), 0 3px 0 #6b4d12;
-  animation:verdictPop .65s cubic-bezier(.2,1.6,.4,1) forwards;
-}
-.verdict.ng .big{
-  color:#f0857c;
-  text-shadow:0 0 20px rgba(209,53,43,.6), 0 3px 0 #5c150f;
-}
-.verdict .sub{
-  font-size:16px;font-weight:700;color:var(--text);
-  opacity:0;animation:fadeIn .35s .25s forwards;
-}
-@keyframes verdictPop{
-  0%{transform:scale(.2);opacity:0;}
-  55%{transform:scale(1.18);opacity:1;}
-  100%{transform:scale(1);opacity:1;}
-}
-@keyframes fadeIn{to{opacity:1;}}
 .confetti{
   position:fixed;top:-16px;z-index:30;
   pointer-events:none;border-radius:2px;
@@ -400,6 +374,22 @@ body.quiz-mode .filters button[data-f="審査員"]{display:none;}
   background:linear-gradient(180deg,#2c2830,#1b191e);
   border:2px solid var(--gold);color:var(--gold);font-size:15px;
 }
+.emikuji-overlay.win .emi-back{
+  background:linear-gradient(180deg,#e8b856,#a87b28);
+  border-color:#fff0d0;color:#571510;font-size:17px;
+  box-shadow:0 0 28px rgba(217,164,65,.75);
+}
+.emikuji-overlay.lose .emi-back{
+  background:linear-gradient(180deg,#3a3a42,#232329);
+  border-color:#5a5a64;color:#a49e94;
+  box-shadow:none;
+}
+.emi-caption{
+  position:absolute;bottom:-38px;width:100%;
+  text-align:center;font-size:17px;font-weight:900;color:#f0857c;
+  animation:fadeIn .3s .9s both;
+}
+@keyframes fadeIn{to{opacity:1;}from{opacity:0;}}
 .shake{animation:shake .4s;}
 @keyframes shake{
   0%,100%{transform:translateX(0);}
@@ -467,7 +457,6 @@ body.quiz-mode .filters button[data-f="審査員"]{display:none;}
   .help{display:none;}
   .choices{grid-template-columns:1fr;gap:8px;margin-top:12px;}
   .choices button{padding:13px 12px;font-size:14px;}
-  .verdict .big{font-size:42px;}
   body.quiz-mode{padding-bottom:36px;}
 }
 @media (prefers-reduced-motion: reduce){
@@ -560,21 +549,21 @@ const years = [
 ];
 
 const kirokuCards = [
-{q:"完全優勝[かんぜんゆうしょう](1位[い]通過[つうか]+全員[ぜんいん]の票[ひょう])をしたコンビは?", a:"チュートリアル(2006年[ねん])だけ"},
-{q:"最終決戦[さいしゅうけっせん]で審査員[しんさいん]全員[ぜんいん]の票[ひょう]をとった2組[くみ]は?", a:"チュートリアル(2006)と\nパンクブーブー(2009)"},
-{q:"はじめて敗者復活[はいしゃふっかつ]から優勝[ゆうしょう]したのは?", a:"サンドウィッチマン(2007年[ねん])"},
-{q:"敗者復活[はいしゃふっかつ]からの優勝[ゆうしょう]、2組[くみ]目[め]は?", a:"トレンディエンジェル(2015年[ねん])"},
-{q:"ただ1回[かい]だけの100点[てん]を出[だ]した審査員[しんさいん]は?", a:"島田紳助[しまだしんすけ](2009年[ねん])"},
-{q:"100点[てん]をもらったコンビは?", a:"笑[わら]い飯[めし](2009年[ねん])"},
-{q:"決勝[けっしょう]にいちばん多[おお]く出[で]たコンビは?", a:"笑[わら]い飯[めし](9回[かい]連続[れんぞく])"},
-{q:"史上[しじょう]最年少[さいねんしょう]優勝[ゆうしょう]は?", a:"霜降[しもふ]り明星[みょうじょう](2018年[ねん])"},
-{q:"史上[しじょう]最年長[さいねんちょう]優勝[ゆうしょう]は?", a:"錦鯉[にしきごい](2021年[ねん])"},
-{q:"史上初[しじょうはつ]の2連覇[れんぱ]をしたのは?", a:"令和[れいわ]ロマン(2023・2024年[ねん])"},
-{q:"トップバッター(1番[ばん])で優勝[ゆうしょう]したのは?", a:"中川家[なかがわけ](2001)と\n令和[れいわ]ロマン(2023・2024)"},
-{q:"3年[ねん]連続[れんぞく]で3位[い]だったコンビは?", a:"麒麟[きりん](2004〜2006年[ねん])"},
+{q:"完全優勝[かんぜんゆうしょう](1位[い]通過[つうか]+全員[ぜんいん]の票[ひょう])をしたコンビは?", a:"チュートリアル(2006年[ねん])だけ", alt:["パンクブーブー(2009年[ねん])だけ","ミルクボーイ(2019年[ねん])だけ","令和[れいわ]ロマン(2024年[ねん])だけ"]},
+{q:"最終決戦[さいしゅうけっせん]で審査員[しんさいん]全員[ぜんいん]の票[ひょう]をとった2組[くみ]は?", a:"チュートリアル(2006)と\nパンクブーブー(2009)", alt:["中川家[なかがわけ](2001)と\n令和[れいわ]ロマン(2023)","サンドウィッチマン(2007)と\nトレンディエンジェル(2015)","笑[わら]い飯[めし](2010)と\n錦鯉[にしきごい](2021)"]},
+{q:"はじめて敗者復活[はいしゃふっかつ]から優勝[ゆうしょう]したのは?", a:"サンドウィッチマン(2007年[ねん])", alt:["オードリー(2008年[ねん])","トレンディエンジェル(2015年[ねん])","スリムクラブ(2010年[ねん])"]},
+{q:"敗者復活[はいしゃふっかつ]からの優勝[ゆうしょう]、2組[くみ]目[め]は?", a:"トレンディエンジェル(2015年[ねん])", alt:["サンドウィッチマン(2007年[ねん])","オードリー(2008年[ねん])","マヂカルラブリー(2020年[ねん])"]},
+{q:"ただ1回[かい]だけの100点[てん]を出[だ]した審査員[しんさいん]は?", a:"島田紳助[しまだしんすけ](2009年[ねん])", alt:["松本人志[まつもとひとし](2003年[ねん])","上沼恵美子[かみぬまえみこ](2018年[ねん])","オール巨人[きょじん](2016年[ねん])"]},
+{q:"100点[てん]をもらったコンビは?", a:"笑[わら]い飯[めし](2009年[ねん])", alt:["パンクブーブー(2009年[ねん])","NON STYLE[ノンスタイル](2009年[ねん])","チュートリアル(2006年[ねん])"]},
+{q:"決勝[けっしょう]にいちばん多[おお]く出[で]たコンビは?", a:"笑[わら]い飯[めし](9回[かい]連続[れんぞく])", alt:["和牛[わぎゅう]","麒麟[きりん]","フットボールアワー"]},
+{q:"史上[しじょう]最年少[さいねんしょう]優勝[ゆうしょう]は?", a:"霜降[しもふ]り明星[みょうじょう](2018年[ねん])", alt:["令和[れいわ]ロマン(2023年[ねん])","ジャルジャル(2018年[ねん])","NON STYLE[ノンスタイル](2008年[ねん])"]},
+{q:"史上[しじょう]最年長[さいねんちょう]優勝[ゆうしょう]は?", a:"錦鯉[にしきごい](2021年[ねん])", alt:["笑[わら]い飯[めし](2010年[ねん])","スリムクラブ(2010年[ねん])","ウエストランド(2022年[ねん])"]},
+{q:"史上初[しじょうはつ]の2連覇[れんぱ]をしたのは?", a:"令和[れいわ]ロマン(2023・2024年[ねん])", alt:["笑[わら]い飯[めし]","サンドウィッチマン","マヂカルラブリー"]},
+{q:"トップバッター(1番[ばん])で優勝[ゆうしょう]したのは?", a:"中川家[なかがわけ](2001)と\n令和[れいわ]ロマン(2023・2024)", alt:["ミルクボーイ(2019)だけ","チュートリアル(2006)と\nサンドウィッチマン(2007)","ますだおかだ(2002)と\n銀[ぎん]シャリ(2016)"]},
+{q:"3年[ねん]連続[れんぞく]で3位[い]だったコンビは?", a:"麒麟[きりん](2004〜2006年[ねん])", alt:["和牛[わぎゅう](2016〜2018年[ねん])","笑[わら]い飯[めし]","ナイツ"]},
 {q:"いちばん多[おお]く審査員[しんさいん]をやった人[ひと]は?", a:"松本人志[まつもとひとし]", alt:["礼二[れいじ]","島田紳助[しまだしんすけ]","上沼恵美子[かみぬまえみこ]"]},
-{q:"エントリーがいちばん多[おお]かった年[とし]は?", a:"2025年[ねん](11521組[くみ])"},
-{q:"エントリーがいちばん少[すく]なかった年[とし]は?", a:"2001年[ねん](1603組[くみ])"}
+{q:"エントリーがいちばん多[おお]かった年[とし]は?", a:"2025年[ねん](11521組[くみ])", alt:["2024年[ねん](10330組[くみ])","2020年[ねん](5081組[くみ])","2001年[ねん](1603組[くみ])"]},
+{q:"エントリーがいちばん少[すく]なかった年[とし]は?", a:"2001年[ねん](1603組[くみ])", alt:["2002年[ねん](1756組[くみ])","2015年[ねん](3472組[くみ])","2024年[ねん](10330組[くみ])"]}
 ];
 
 const episodeCards = [
@@ -663,7 +652,7 @@ years.forEach(d=>{
   cards.push({c:"回・年", q:`${d.y}年[ねん]は第何回[だいなんかい]?`, a:`第[だい]${d.kai}回[かい]`});
   if(entries[d.y]) cards.push({c:"エントリー", q:`${d.y}年[ねん]のエントリーは何組[なんくみ]?`, a:entries[d.y]});
 });
-cards.push({c:"回・年", q:"2011〜2014年[ねん]のM-1[エムワン]は?", a:"おやすみ(なかった)\n2010年[ねん]でいったんおわり、\n2015年[ねん]にふっかつ"});
+cards.push({c:"回・年", q:"2011〜2014年[ねん]のM-1[エムワン]は?", a:"おやすみ(なかった)\n2010年[ねん]でいったんおわり、\n2015年[ねん]にふっかつ", alt:["ふつうにやっていた","夏[なつ]にやっていた","ラジオだけでやっていた"]});
 kirokuCards.forEach(k=>cards.push({c:"きろく", q:k.q, a:k.a, alt:k.alt}));
 episodeCards.forEach(k=>cards.push({c:"エピソード", q:k.q, a:k.a, alt:k.alt}));
 
@@ -806,8 +795,14 @@ function renderQuiz(){
 }
 
 function similarType(a,b){
-  const isYear = s=>/^\d{4}年/.test(s);
-  return a.includes('年[ねん]')===b.includes('年[ねん]') && a.startsWith('第')===b.startsWith('第') && isYear(a)===isYear(b);
+  const sig = s => [
+    /^\d{4}年/.test(s),
+    s.includes('年[ねん]'),
+    s.startsWith('第'),
+    s.includes('票[ひょう]'),
+    s.includes('番[ばん]')
+  ].join();
+  return sig(a)===sig(b);
 }
 
 function buildChoices(c){
@@ -852,39 +847,33 @@ function buildChoices(c){
 function answerQuiz(btn, ok){
   if(quizLock) return;
   quizLock = true; qTotal++;
-  const correct = cards[pool[idx]].a;
+  const c = cards[pool[idx]];
   [...$('choices').children].forEach(b=>{
     b.disabled = true;
-    if(b.dataset.a===correct) b.classList.add('correct');
+    if(b.dataset.a===c.a) b.classList.add('correct');
   });
-  if(ok){
-    qScore++; qStreak++;
-    showVerdict(true);
-    $('card').classList.add('flash');
-    setTimeout(()=>$('card').classList.remove('flash'), 550);
-    if(qStreak>=3) confetti(qStreak>=5 ? 26 : 14);
-  }else{
-    qStreak = 0;
-    showVerdict(false);
-    btn.classList.add('wrong');
-    $('card').classList.add('shake');
-    setTimeout(()=>$('card').classList.remove('shake'), 500);
-  }
+  if(ok){ qScore++; qStreak++; }
+  else{ qStreak = 0; btn.classList.add('wrong'); }
   quizStatus();
-  setTimeout(()=>{
-    const nx = (idx+1)%pool.length;
-    const c2 = cards[pool[nx]];
-    emikuji(catLabels[c2.c] || c2.c, ()=>{ idx=nx; render(); });
-  }, ok?900:1800);
-}
-
-function showVerdict(ok){
-  const v = document.createElement('div');
-  v.className = 'verdict' + (ok ? '' : ' ng');
-  v.innerHTML = '<span class="big">' + (ok ? 'せいかい!' : 'ざんねん…') + '</span>' +
-    (ok && qStreak>=2 ? '<span class="sub">🔥' + qStreak + 'れんぞく!</span>' : '');
-  $('card').appendChild(v);
-  setTimeout(()=>v.remove(), ok ? 850 : 1700);
+  const cap = ok && qStreak>=2 ? '🔥'+qStreak+'れんぞく!' : '';
+  emikuji(ok ? 'せいかい!' : 'ざんねん…', ()=>{
+    if(ok){
+      $('card').classList.add('flash');
+      setTimeout(()=>$('card').classList.remove('flash'), 550);
+      if(qStreak>=3) confetti(qStreak>=5 ? 26 : 14);
+    }else{
+      $('card').classList.add('shake');
+      setTimeout(()=>$('card').classList.remove('shake'), 500);
+    }
+    let wait = ok ? 600 : 1300;
+    if(c.votes){
+      const n = c.votes.reduce((s,v)=>s+v.v,0);
+      $('card-text').innerHTML = voteRevealHTML(c.votes);
+      $('card-note').textContent = 'とうひょうオープン!';
+      wait = 500 + n*400 + 1200;
+    }
+    setTimeout(()=>{ idx=(idx+1)%pool.length; render(); }, wait);
+  }, ok ? 'win' : 'lose', cap);
 }
 
 function confetti(n){
@@ -925,15 +914,16 @@ function voteRevealHTML(votes){
   return h;
 }
 
-function emikuji(label, done){
+function emikuji(label, done, tone, caption){
   const o = document.createElement('div');
-  o.className = 'emikuji-overlay';
+  o.className = 'emikuji-overlay' + (tone ? ' '+tone : '');
   o.innerHTML = '<div class="emi-wrap">'+
     '<div class="emi-stick"><div class="emi-inner">'+
     '<div class="emi-face emi-front">えみくじ</div>'+
     '<div class="emi-face emi-back">'+rubyfy(label)+'</div>'+
     '</div></div>'+
     '<div class="emi-box"></div>'+
+    (caption ? '<div class="emi-caption">'+caption+'</div>' : '')+
     '</div>';
   $('card').appendChild(o);
   setTimeout(()=>{ o.remove(); if(done) done(); }, 1650);
