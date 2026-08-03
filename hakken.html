@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#101312">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>はっけんカード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#101312;
+  --panel:#1a1f1c;
+  --panel-2:#212723;
+  --line:#343d38;
+  --green:#2f8f5b;
+  --green-deep:#1d5c3a;
+  --gold:#d9a441;
+  --text:#eef2ee;
+  --text-dim:#9aa49c;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+button,.card{touch-action:manipulation;}
+body{
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(47,143,91,.20), transparent 60%),
+    radial-gradient(ellipse 45% 35% at 15% 110%, rgba(217,164,65,.10), transparent 60%),
+    radial-gradient(ellipse 45% 35% at 85% 110%, rgba(217,164,65,.10), transparent 60%),
+    var(--bg);
+  color:var(--text);
+  font-family:"Zen Maru Gothic",sans-serif;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:32px 16px 64px;
+}
+ruby{ruby-align:center;}
+rt{font-size:0.45em;font-weight:400;color:inherit;opacity:0.85;letter-spacing:0;}
+header{width:100%;max-width:740px;margin-bottom:28px;}
+.eyebrow{font-size:12px;letter-spacing:0.3em;color:var(--gold);font-weight:700;margin-bottom:6px;}
+h1{
+  font-size:26px;font-weight:900;letter-spacing:0.02em;
+  border-left:6px solid var(--green);padding-left:14px;line-height:1.6;
+}
+h1 small{display:block;font-size:13px;font-weight:400;color:var(--text-dim);margin-top:6px;letter-spacing:0.05em;line-height:2;}
+.filters{display:flex;gap:8px;flex-wrap:wrap;width:100%;max-width:740px;margin-bottom:20px;}
+.filters button{
+  font-family:inherit;font-size:14px;font-weight:700;padding:10px 20px;
+  background:var(--panel);color:var(--text-dim);
+  border:1px solid var(--line);border-radius:999px;cursor:pointer;transition:all .15s;line-height:1.6;
+}
+@media (hover:hover){.filters button:hover{border-color:var(--green);color:var(--text);}}
+.filters button.active{background:var(--green);border-color:var(--green);color:#fff;}
+.status{
+  width:100%;max-width:740px;display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:10px;font-size:13px;color:var(--text-dim);
+}
+.status .learned-count{color:var(--gold);font-weight:700;}
+.badge{
+  display:inline-block;font-size:13px;font-weight:700;padding:5px 16px;border-radius:4px;
+  background:var(--green-deep);color:#fff;letter-spacing:0.05em;line-height:1.8;
+}
+.card{
+  width:100%;max-width:740px;min-height:320px;
+  background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--green);
+  border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:48px 32px;cursor:pointer;position:relative;user-select:none;
+  transition:border-color .15s;
+  box-shadow:0 0 0 1px rgba(217,164,65,.28), 0 14px 44px rgba(0,0,0,.5);
+  overflow:hidden;
+}
+@media (hover:hover){.card:hover{border-color:var(--green);border-top-color:var(--green);}}
+.card.answer{border-top-color:var(--gold);background:var(--panel-2);}
+.side-label{font-size:14px;letter-spacing:0.2em;font-weight:700;color:var(--text-dim);margin-bottom:20px;}
+.card.answer .side-label{color:var(--gold);}
+.card-text{font-size:24px;font-weight:700;line-height:2.2;max-width:640px;}
+.card.answer .card-text{color:var(--gold);font-weight:700;font-size:21px;line-height:2.2;}
+.card-note{font-size:13px;color:var(--text-dim);margin-top:26px;line-height:1.8;}
+.learned-tag{
+  position:absolute;top:14px;right:16px;font-size:12px;font-weight:700;
+  color:var(--gold);border:1px solid var(--gold);border-radius:4px;padding:3px 10px;display:none;
+}
+.card.is-learned .learned-tag{display:block;}
+.hard-tag{
+  position:absolute;top:14px;left:16px;font-size:12px;font-weight:700;
+  color:#7cc79a;border:1px solid var(--green);border-radius:4px;padding:3px 10px;display:none;
+}
+.card.is-hard .hard-tag{display:block;}
+.controls{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:22px;width:100%;max-width:740px;}
+.controls button{
+  font-family:inherit;font-size:15px;font-weight:700;padding:14px 24px;border-radius:8px;
+  border:1px solid var(--line);background:var(--panel);color:var(--text);cursor:pointer;transition:all .15s;
+}
+.controls button.primary{background:var(--green);border-color:var(--green);color:#fff;}
+.controls button.gold{border-color:var(--gold);color:var(--gold);}
+.controls button.fav{border-color:var(--green);color:#7cc79a;}
+@media (hover:hover){
+  .controls button:hover{border-color:var(--text-dim);background:var(--panel-2);}
+  .controls button.primary:hover{background:#3aa86d;}
+  .controls button.gold:hover{background:var(--gold);color:#1a1408;}
+  .controls button.fav:hover{background:var(--green);color:#fff;}
+}
+.emikuji-overlay{
+  position:fixed;inset:0;z-index:40;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(16,19,18,.92);
+}
+.emi-wrap{position:relative;width:200px;height:240px;}
+.emi-box{
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:180px;height:80px;
+  background:linear-gradient(180deg,#5c3a1e,#3a2412);
+  border:2px solid #7a5327;border-radius:8px 8px 4px 4px;
+  box-shadow:0 8px 20px rgba(0,0,0,.5);
+  animation:emiShake .35s ease;
+}
+.emi-box::before{
+  content:"きょうの1まい";
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  font-size:13px;font-weight:900;color:var(--gold);letter-spacing:.15em;white-space:nowrap;
+}
+@keyframes emiShake{
+  0%,100%{transform:translateX(-50%);}
+  25%{transform:translateX(calc(-50% - 5px)) rotate(-1.5deg);}
+  75%{transform:translateX(calc(-50% + 5px)) rotate(1.5deg);}
+}
+.emi-stick{
+  position:absolute;bottom:62px;left:50%;
+  width:48px;height:160px;margin-left:-24px;
+  perspective:500px;
+  animation:emiRise .5s .3s cubic-bezier(.2,1.3,.5,1) both;
+}
+@keyframes emiRise{
+  0%{transform:translateY(130px);opacity:0;}
+  40%{opacity:1;}
+  100%{transform:translateY(0);opacity:1;}
+}
+.emi-inner{
+  position:relative;display:block;width:100%;height:100%;
+  transform-style:preserve-3d;
+  animation:emiFlip .45s .95s ease forwards;
+}
+@keyframes emiFlip{to{transform:rotateY(180deg);}}
+.emi-face{
+  position:absolute;inset:0;backface-visibility:hidden;
+  border-radius:8px;display:flex;align-items:center;justify-content:center;
+  writing-mode:vertical-rl;font-weight:900;letter-spacing:.15em;
+}
+.emi-face ruby{writing-mode:vertical-rl;}
+.emi-front{
+  background:linear-gradient(180deg,#2f8f5b,#1d5c3a);
+  border:2px solid var(--gold);color:#fff;font-size:16px;
+}
+.emi-back{
+  transform:rotateY(180deg);
+  background:linear-gradient(180deg,#2c3030,#1b1e1d);
+  border:2px solid var(--gold);color:var(--gold);font-size:15px;
+}
+.progress-bar{
+  width:100%;max-width:740px;height:5px;background:var(--line);
+  border-radius:3px;margin-top:26px;overflow:hidden;
+}
+.progress-bar div{height:100%;background:var(--green);width:0;transition:width .2s;}
+.help{margin-top:18px;font-size:12px;color:var(--text-dim);letter-spacing:0.05em;}
+.help kbd{
+  font-family:inherit;border:1px solid var(--line);border-radius:3px;
+  padding:1px 7px;margin:0 2px;background:var(--panel);
+}
+@media (min-width:561px) and (max-width:1080px) and (pointer:coarse){
+  .filters button{padding:12px 22px;font-size:15px;}
+  .controls button{padding:17px 26px;font-size:16px;border-radius:10px;}
+  .card{min-height:380px;}
+  .card-text{font-size:28px;}
+  .help{display:none;}
+}
+@media (max-width:560px){
+  body{padding:10px 12px calc(180px + env(safe-area-inset-bottom));}
+  header{margin-bottom:8px;}
+  h1{font-size:17px;}
+  h1 small{display:none;}
+  .eyebrow{margin-bottom:3px;}
+  .filters{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-bottom:8px;padding-bottom:4px;}
+  .filters::-webkit-scrollbar{display:none;}
+  .filters button{flex:0 0 auto;padding:9px 15px;font-size:13px;}
+  .status{margin-bottom:6px;font-size:12px;}
+  .card-text{font-size:19px;}
+  .card.answer .card-text{font-size:17px;}
+  .card{padding:28px 16px;min-height:240px;}
+  .card-note{margin-top:14px;}
+  .controls{
+    position:fixed;left:0;right:0;bottom:0;z-index:10;
+    max-width:none;margin-top:0;
+    background:rgba(16,19,18,.97);
+    border-top:1px solid var(--line);
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:8px;
+  }
+  .controls button{padding:14px 4px;font-size:14px;border-radius:10px;}
+  .controls button.primary{font-size:16px;}
+  .controls button:last-child{grid-column:1 / -1;padding:7px;font-size:12px;color:var(--text-dim);background:transparent;border-color:transparent;}
+  .progress-bar{margin-top:10px;}
+  .help{display:none;}
+}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none !important;animation:none !important;}
+  .emi-inner{transform:rotateY(180deg);}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">かんがえる あそび</p>
+  <h1>はっけんカード<small>にてる・ちがい・なんで・もしも ― こたえは ひとつじゃない ― <span id="total-label"></span></small></h1>
+</header>
+
+<div class="filters" id="filters">
+  <button data-f="all" class="active">すべて</button>
+  <button data-f="にてる">にてるさがし</button>
+  <button data-f="ちがい">ちがいさがし</button>
+  <button data-f="なんで">なんでだろう</button>
+  <button data-f="もしも">もしも</button>
+  <button data-f="unlearned">まだのカード</button>
+  <button data-f="hard">おきにいり</button>
+</div>
+
+<div class="status">
+  <span id="counter"></span>
+  <span class="learned-count" id="learned-count"></span>
+  <span class="badge" id="cat"></span>
+</div>
+
+<div class="card" id="card" tabindex="0" role="button" aria-label="カードをめくる">
+  <span class="learned-tag">✓ はなした</span>
+  <span class="hard-tag">⭐ おきにいり</span>
+  <p class="side-label" id="side-label">もんだい</p>
+  <p class="card-text" id="card-text"></p>
+  <p class="card-note" id="card-note">タップかクリックで かんがえのタネ</p>
+</div>
+
+<div class="controls">
+  <button onclick="prev()">← まえへ</button>
+  <button class="primary" onclick="flip()">めくる</button>
+  <button onclick="next()">つぎへ →</button>
+  <button class="gold" onclick="toggleLearned()">はなした ✓</button>
+  <button class="fav" onclick="toggleHard()">おきにいり ⭐</button>
+  <button onclick="emikujiDraw()">きょうの1まい 🎋</button>
+  <button onclick="resetLearned()">きろくリセット</button>
+</div>
+
+<div class="progress-bar"><div id="progress"></div></div>
+
+<p class="help">
+  <kbd>Space</kbd> めくる　<kbd>←</kbd><kbd>→</kbd> いどう　<kbd>G</kbd> はなした　<kbd>H</kbd> おきにいり　<kbd>S</kbd> シャッフル
+</p>
+
+<script>
+const cards = [
+// にてるさがし：「どこがにてる?」
+{c:"にてる", q:"「おわらい」と「おどろき」、\nどこが にてる?", a:"どっちも「おもってたのと ちがう!」が おきてる。\nでも おばけやしきでは わらえないのは なんでだろう?"},
+{c:"にてる", q:"「かさ」と「やね」、\nどこが にてる?", a:"どっちも あめから まもってくれる。\nじゃあ「ぼうし」も なかまかな? ほかにも あるかな?"},
+{c:"にてる", q:"「れいぞうこ」と「ふゆ」、\nどこが にてる?", a:"どっちも つめたくて、たべものが ながもちする。\nふゆの そとは おっきな れいぞうこ かもしれない"},
+{c:"にてる", q:"「ねること」と「じゅうでん」、\nどこが にてる?", a:"げんきが なくなったら、とまって ためる。\nきみの じゅうでんは 1かい なんじかん?"},
+{c:"にてる", q:"「ほん」と「テレビ」、\nどこが にてる?", a:"どっちも あたまのなかに おはなしを とどけてくれる。\nじゃあ ちがうところは どこだろう?"},
+{c:"にてる", q:"「おかね」と「ありがとう」、\nどこが にてる?", a:"なにかを してもらったとき、あいてに わたすもの。\nおかねで かえないものにも「ありがとう」は はらえるね"},
+{c:"にてる", q:"「しんごう」と「ことば」、\nどこが にてる?", a:"どっちも あいてに「とまって」「いいよ」を つたえてる。\nいろも ことばの なかまかもしれない"},
+{c:"にてる", q:"「たね」と「たまご」、\nどこが にてる?", a:"ちいさいのに、なかに「これからのいのち」が はいってる。\nほかに「これから」が はいってるもの、あるかな?"},
+// ちがいさがし：「にてるのに、なにがちがう?」
+{c:"ちがい", q:"「おばけやしき」と「コント」、\nどっちも びっくりするのに\nかたほうだけ わらえる。なにが ちがう?", a:"「あんしん」が あるか どうか、かも。\nだいじょうぶって わかってると、びっくりは わらいに かわる"},
+{c:"ちがい", q:"「うそ」と「じょうだん」、\nどっちも ほんとじゃない。\nなにが ちがう?", a:"あいてが あとで わらえるか、かなしむか。\nおなじ ことばでも、どっちにも なるから むずかしい"},
+{c:"ちがい", q:"「こおり」と「ガラス」、\nどっちも すきとおって かたい。\nなにが ちがう?", a:"あっためて みると わかる。\nとけて みずに なるのは どっち?"},
+{c:"ちがい", q:"「けんか」と「かけっこ」、\nどっちも かちたい きもち。\nなにが ちがう?", a:"おわったあと、なかよしで いられるのは どっち?\n「かちたい」に ルールが あると あそびに なるのかも"},
+{c:"ちがい", q:"「かりる」と「もらう」、\nどっちも ひとから うけとる。\nなにが ちがう?", a:"かえすか、かえさなくて いいか。\nとしょかんの ほんは どっちだろう?"},
+{c:"ちがい", q:"「おもちゃ」と「どうぐ」、\nどっちも てで つかう。\nなにが ちがう?", a:"あそぶための ものと、なにかを つくるための もの。\nでも どうぐで あそぶひとも いるね。M-1の マイクは どっち?"},
+{c:"ちがい", q:"「ダンス」と「たいそう」、\nどっちも からだを うごかす。\nなにが ちがう?", a:"たのしむためか、じょうずに なるためか。\nりょうほう いっぺんに できることも あるかな?"},
+{c:"ちがい", q:"「ないてるひと」と「わらってるひと」、\nどっちも なみだが でることがある。\nなにが ちがう?", a:"うれしくても かなしくても、きもちが おっきくなると なみだが でる。\nなみだは「きもちが あふれた しるし」かもしれない"},
+// なんでだろう
+{c:"なんで", q:"なんで よるに なると\nねむくなるんだろう?", a:"からだの なかに とけいが あるんだって。\nたいようの ひかりを あびると、とけいの はりが あう"},
+{c:"なんで", q:"なんで おふろから でると\nさむく かんじるんだろう?", a:"からだに ついた みずが かわくとき、\nからだの あつさを いっしょに もっていくから"},
+{c:"なんで", q:"なんで しんごうの「とまれ」は\nあかいろ なんだろう?", a:"あかは とおくからでも いちばん よく みえる いろだから。\nきけんの いろが あかなのは せかいじゅう おなじ"},
+{c:"なんで", q:"なんで おかねを つかうんだろう?\nこうかんこじゃ だめなのかな?", a:"「おにくと おもちゃを こうかんして」だと たいへん。\nおかねは「あとで すきなものと こうかんできる けん」なんだ"},
+{c:"なんで", q:"なんで ごはんを\nたべなきゃ いけないんだろう?", a:"きみの からだは、きみが たべたもので できてる。\nきのうの ごはんは、もう きみの いちぶ"},
+{c:"なんで", q:"なんで なつは あつくて\nふゆは さむいんだろう?", a:"ちきゅうは ちょっと かたむいて たいようの まわりを まわってる。\nかたむきで たいようの あたりかたが かわるから"},
+{c:"なんで", q:"なんで わらうと\nたのしく なるんだろう?", a:"たのしいから わらうだけじゃなくて、\nわらうと たのしくなる みちも あるらしい。ためしてみて"},
+{c:"なんで", q:"なんで おとなは にがい コーヒーを\nおいしそうに のむんだろう?", a:"にがさの むこうに おいしさを みつけたから。\nあじの はっけんは、おとなに なっても つづくんだ"},
+// もしも
+{c:"もしも", q:"もしも せかいじゅうの しんごうが\nきえちゃったら どうなる?", a:"みんなが「じぶんが さき!」だと どうなるかな?\nルールは だれの ために あるんだろう?"},
+{c:"もしも", q:"もしも おかねが むげんに\nつかえたら どうなる?", a:"みんなが むげんに もってたら、おみせの ものは たりるかな?\n「ねだん」って なんの ために あるんだろう?"},
+{c:"もしも", q:"もしも よるが\nなかったら どうなる?", a:"いつ ねる? ほしは いつ みる?\nこまるものと よろこぶものを かんがえてみよう"},
+{c:"もしも", q:"もしも みんなの かおが\nおんなじだったら どうなる?", a:"どうやって ともだちを みつける?\nこえ? あるきかた? わらいかた?"},
+{c:"もしも", q:"もしも どうぶつと\nおはなし できたら?", a:"さいしょに だれと なにを はなす?\nむこうから みたら にんげんは どう みえてるんだろう?"},
+{c:"もしも", q:"もしも あめが ぜんぶ\nジュースだったら どうなる?", a:"さいしょは うれしいけど…かわや うみは どうなる?\nおさかなは のめるかな?"},
+{c:"もしも", q:"もしも わすれることが\nできなかったら どうなる?", a:"いやなことも ずーっと おぼえてることになる。\n「わすれる」は こまった きのうじゃ ないのかも"},
+{c:"もしも", q:"もしも M-1に でるなら\nどんな ネタを やる?", a:"だれと でる? どんな ボケ?\n「おもってたのと ちがう!」を つくれたら、それが お笑[わら]いだ"}
+];
+
+const catLabels = {
+  "にてる":"にてるさがし",
+  "ちがい":"ちがいさがし",
+  "なんで":"なんでだろう",
+  "もしも":"もしも"
+};
+
+function rubyfy(s){
+  return s
+    .replace(/([一-鿿㐀-䶿々〆]+)\[([^\]]+)\]/g, '<ruby>$1<rt>$2</rt></ruby>')
+    .replace(/([A-Za-z][A-Za-z0-9 .&'\-]*)\[([^\]]+)\]/g, '<ruby>$1<rt>$2</rt></ruby>')
+    .replace(/\n/g, '<br>');
+}
+
+let learned = new Set();
+let hard = new Set();
+try{
+  const saved = localStorage.getItem('hakken-talked');
+  if(saved) learned = new Set(JSON.parse(saved));
+  const savedHard = localStorage.getItem('hakken-fav');
+  if(savedHard) hard = new Set(JSON.parse(savedHard));
+}catch(e){}
+
+function saveLearned(){
+  try{
+    localStorage.setItem('hakken-talked', JSON.stringify([...learned]));
+    localStorage.setItem('hakken-fav', JSON.stringify([...hard]));
+  }catch(e){}
+}
+
+let filter = 'all';
+let pool = [];
+let idx = 0, showAnswer = false;
+
+const $ = id => document.getElementById(id);
+
+document.getElementById('total-label').textContent = 'ぜんぶで' + cards.length + 'まい';
+
+function buildPool(){
+  pool = cards.map((_,i)=>i).filter(i=>{
+    if(filter==='all') return true;
+    if(filter==='unlearned') return !learned.has(i);
+    if(filter==='hard') return hard.has(i);
+    return cards[i].c===filter;
+  });
+  if(pool.length===0) pool = cards.map((_,i)=>i);
+  idx = 0; showAnswer = false;
+}
+
+function setFilter(f, btn){
+  filter = f;
+  document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildPool();
+  render();
+}
+
+document.querySelectorAll('.filters button').forEach(b=>{
+  b.addEventListener('click', ()=>setFilter(b.dataset.f, b));
+});
+
+function render(){
+  const ci = pool[idx];
+  const c = cards[ci];
+  $('counter').textContent = (idx+1) + ' / ' + pool.length;
+  $('learned-count').innerHTML = 'はなした: ' + learned.size + ' / ' + cards.length + '　<span style="color:#7cc79a;">⭐ ' + hard.size + '</span>';
+  $('cat').textContent = catLabels[c.c] || c.c;
+  $('side-label').textContent = showAnswer ? 'かんがえのタネ' : 'もんだい';
+  $('card-text').innerHTML = rubyfy(showAnswer ? c.a : c.q);
+  $('card-note').textContent = showAnswer ? 'きみは どう おもう?' : 'タップかクリックで かんがえのタネ';
+  $('card').classList.toggle('answer', showAnswer);
+  $('card').classList.toggle('is-learned', learned.has(ci));
+  $('card').classList.toggle('is-hard', hard.has(ci));
+  $('progress').style.width = ((idx+1)/pool.length*100) + '%';
+}
+
+function emikuji(label, done){
+  const o = document.createElement('div');
+  o.className = 'emikuji-overlay';
+  o.innerHTML = '<div class="emi-wrap">'+
+    '<div class="emi-stick"><div class="emi-inner">'+
+    '<div class="emi-face emi-front"></div>'+
+    '<div class="emi-face emi-back">'+rubyfy(label)+'</div>'+
+    '</div></div>'+
+    '<div class="emi-box"></div>'+
+    '</div>';
+  document.body.appendChild(o);
+  setTimeout(()=>{ o.remove(); if(done) done(); }, 2400);
+}
+
+function emikujiDraw(){
+  if(document.querySelector('.emikuji-overlay')) return;
+  const target = Math.floor(Math.random()*pool.length);
+  const c = cards[pool[target]];
+  emikuji(catLabels[c.c] || c.c, ()=>{
+    idx = target; showAnswer = false; render();
+  });
+}
+
+function flip(){ showAnswer = !showAnswer; render(); }
+function next(){ idx = (idx+1) % pool.length; showAnswer = false; render(); }
+function prev(){ idx = (idx-1+pool.length) % pool.length; showAnswer = false; render(); }
+function toggleLearned(){
+  const ci = pool[idx];
+  if(learned.has(ci)){ learned.delete(ci); }
+  else { learned.add(ci); }
+  saveLearned(); render();
+}
+function toggleHard(){
+  const ci = pool[idx];
+  if(hard.has(ci)){ hard.delete(ci); }
+  else { hard.add(ci); }
+  saveLearned(); render();
+}
+function shuffleCards(){
+  for(let i=pool.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [pool[i],pool[j]]=[pool[j],pool[i]];
+  }
+  idx = 0; showAnswer = false; render();
+}
+function resetLearned(){
+  if(confirm('「はなした」と「おきにいり」のきろくをぜんぶけしますか?')){
+    learned.clear(); hard.clear(); saveLearned(); render();
+  }
+}
+
+$('card').addEventListener('click', flip);
+
+let touchX=null, touchY=null;
+$('card').addEventListener('touchstart', e=>{
+  touchX=e.changedTouches[0].clientX; touchY=e.changedTouches[0].clientY;
+},{passive:true});
+$('card').addEventListener('touchend', e=>{
+  if(touchX===null) return;
+  const dx=e.changedTouches[0].clientX-touchX, dy=e.changedTouches[0].clientY-touchY;
+  touchX=null;
+  if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)*1.5){ dx<0?next():prev(); }
+},{passive:true});
+document.addEventListener('keydown', e=>{
+  if(e.code==='Space'){ e.preventDefault(); flip(); }
+  else if(e.key==='ArrowRight'){ next(); }
+  else if(e.key==='ArrowLeft'){ prev(); }
+  else if(e.key==='g' || e.key==='G'){ toggleLearned(); }
+  else if(e.key==='h' || e.key==='H'){ toggleHard(); }
+  else if(e.key==='s' || e.key==='S'){ shuffleCards(); }
+});
+
+buildPool();
+render();
+</script>
+</body>
+</html>
