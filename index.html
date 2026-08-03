@@ -271,6 +271,15 @@ body.quiz-mode .filters button[data-f="審査員"]{display:none;}
 }
 @media (hover:hover){.choices button:hover:not(:disabled){border-color:var(--red);}}
 .choices button.correct{background:#2f7d4a;border-color:#2f7d4a;color:#fff;}
+.choices button.next-q{
+  grid-column:1/-1;
+  border-color:var(--red);
+  border-left:5px solid var(--red);
+  background:var(--red);
+  color:#fff;
+  text-align:center;
+}
+@media (hover:hover){.choices button.next-q:hover:not(:disabled){background:#e2483d;border-color:#e2483d;}}
 .choices button.wrong{background:var(--red-deep);border-color:var(--red-deep);color:#fff;}
 .choices button:disabled{cursor:default;}
 .confetti{
@@ -755,7 +764,7 @@ function renderCard(){
 }
 
 let mode = 'card';
-let quizLock = false;
+let quizLock = false, quizAwaitNext = false;
 let qScore = 0, qTotal = 0, qStreak = 0;
 
 document.querySelectorAll('.mode-toggle button').forEach(b=>{
@@ -807,7 +816,7 @@ function similarType(a,b){
 
 function buildChoices(c){
   const el = $('choices');
-  el.innerHTML = ''; quizLock = false;
+  el.innerHTML = ''; quizLock = false; quizAwaitNext = false;
   let cands;
   if(c.alt){
     cands = [...c.alt];
@@ -865,15 +874,36 @@ function answerQuiz(btn, ok){
       $('card').classList.add('shake');
       setTimeout(()=>$('card').classList.remove('shake'), 500);
     }
-    let wait = ok ? 600 : 1300;
     if(c.votes){
-      const n = c.votes.reduce((s,v)=>s+v.v,0);
       $('card-text').innerHTML = voteRevealHTML(c.votes);
       $('card-note').textContent = 'とうひょうオープン!';
-      wait = 500 + n*400 + 1200;
+    }else if(!ok){
+      $('card').classList.add('answer');
+      $('side-label').textContent = 'こたえ';
+      $('card-text').innerHTML = rubyfy(c.a);
+      $('card-text').style.fontSize = c.a.length > 60 ? '19px' : '';
+      $('card-note').textContent = 'こたえは これ!';
+    }else{
+      $('card-note').textContent = 'せいかい! 🎉';
     }
-    setTimeout(()=>{ idx=(idx+1)%pool.length; render(); }, wait);
+    showNextButton();
   }, ok ? 'win' : 'lose', cap);
+}
+
+function showNextButton(){
+  quizAwaitNext = true;
+  const b = document.createElement('button');
+  b.className = 'next-q';
+  b.textContent = 'つぎのもんだいへ →';
+  b.addEventListener('click', nextQuiz);
+  $('choices').appendChild(b);
+}
+
+function nextQuiz(){
+  if(!quizAwaitNext) return;
+  quizAwaitNext = false;
+  idx = (idx+1) % pool.length;
+  render();
 }
 
 function confetti(n){
@@ -938,7 +968,7 @@ function emikujiDraw(){
   });
 }
 
-function flip(){ if(mode==='quiz') return; showAnswer = !showAnswer; render(); }
+function flip(){ if(mode==='quiz'){ nextQuiz(); return; } showAnswer = !showAnswer; render(); }
 function next(){ if(mode==='quiz'&&quizLock) return; idx = (idx+1) % pool.length; showAnswer = false; render(); }
 function prev(){ if(mode==='quiz'&&quizLock) return; idx = (idx-1+pool.length) % pool.length; showAnswer = false; render(); }
 function toggleLearned(){
