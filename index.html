@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>M-1グランプリ いちもんいっとうカード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#111013;
+  --panel:#1c1a1f;
+  --panel-2:#242127;
+  --line:#38343d;
+  --red:#d1352b;
+  --red-deep:#8f1f18;
+  --gold:#d9a441;
+  --text:#f2efe9;
+  --text-dim:#a49e94;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:"Zen Maru Gothic",sans-serif;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:32px 16px 64px;
+}
+ruby{ruby-align:center;}
+rt{
+  font-size:0.45em;
+  font-weight:400;
+  color:inherit;
+  opacity:0.85;
+  letter-spacing:0;
+}
+header{width:100%;max-width:740px;margin-bottom:28px;}
+.eyebrow{
+  font-size:12px;
+  letter-spacing:0.3em;
+  color:var(--gold);
+  font-weight:700;
+  margin-bottom:6px;
+}
+h1{
+  font-size:26px;
+  font-weight:900;
+  letter-spacing:0.02em;
+  border-left:6px solid var(--red);
+  padding-left:14px;
+  line-height:1.6;
+}
+h1 small{display:block;font-size:13px;font-weight:400;color:var(--text-dim);margin-top:6px;letter-spacing:0.05em;line-height:2;}
+.filters{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  width:100%;
+  max-width:740px;
+  margin-bottom:20px;
+}
+.filters button{
+  font-family:inherit;
+  font-size:14px;
+  font-weight:700;
+  padding:10px 20px;
+  background:var(--panel);
+  color:var(--text-dim);
+  border:1px solid var(--line);
+  border-radius:999px;
+  cursor:pointer;
+  transition:all .15s;
+  line-height:1.6;
+}
+.filters button:hover{border-color:var(--red);color:var(--text);}
+.filters button.active{background:var(--red);border-color:var(--red);color:#fff;}
+.status{
+  width:100%;
+  max-width:740px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+  font-size:13px;
+  color:var(--text-dim);
+}
+.status .learned-count{color:var(--gold);font-weight:700;}
+.badge{
+  display:inline-block;
+  font-size:13px;
+  font-weight:700;
+  padding:5px 16px;
+  border-radius:4px;
+  background:var(--red-deep);
+  color:#fff;
+  letter-spacing:0.05em;
+  line-height:1.8;
+}
+.card{
+  width:100%;
+  max-width:740px;
+  min-height:320px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-top:4px solid var(--red);
+  border-radius:12px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:48px 32px;
+  cursor:pointer;
+  position:relative;
+  user-select:none;
+  transition:border-color .15s;
+}
+.card:hover{border-color:var(--red);border-top-color:var(--red);}
+.card.answer{border-top-color:var(--gold);background:var(--panel-2);}
+.side-label{
+  font-size:14px;
+  letter-spacing:0.2em;
+  font-weight:700;
+  color:var(--text-dim);
+  margin-bottom:20px;
+}
+.card.answer .side-label{color:var(--gold);}
+.card-text{
+  font-size:26px;
+  font-weight:700;
+  line-height:2.3;
+  max-width:640px;
+}
+.card.answer .card-text{color:var(--gold);font-weight:900;font-size:30px;}
+.card-note{font-size:13px;color:var(--text-dim);margin-top:26px;line-height:1.8;}
+.learned-tag{
+  position:absolute;
+  top:14px;
+  right:16px;
+  font-size:12px;
+  font-weight:700;
+  color:var(--gold);
+  border:1px solid var(--gold);
+  border-radius:4px;
+  padding:3px 10px;
+  display:none;
+}
+.card.is-learned .learned-tag{display:block;}
+.controls{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-top:22px;
+  width:100%;
+  max-width:740px;
+}
+.controls button{
+  font-family:inherit;
+  font-size:15px;
+  font-weight:700;
+  padding:14px 24px;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--text);
+  cursor:pointer;
+  transition:all .15s;
+}
+.controls button:hover{border-color:var(--text-dim);background:var(--panel-2);}
+.controls button.primary{background:var(--red);border-color:var(--red);color:#fff;}
+.controls button.primary:hover{background:#e2483d;}
+.controls button.gold{border-color:var(--gold);color:var(--gold);}
+.controls button.gold:hover{background:var(--gold);color:#1a1408;}
+.controls button.fight{border-color:#e2483d;color:#f0857c;}
+.controls button.fight:hover{background:var(--red);color:#fff;}
+.hard-tag{
+  position:absolute;
+  top:14px;
+  left:16px;
+  font-size:12px;
+  font-weight:700;
+  color:#f0857c;
+  border:1px solid #e2483d;
+  border-radius:4px;
+  padding:3px 10px;
+  display:none;
+}
+.card.is-hard .hard-tag{display:block;}
+.progress-bar{
+  width:100%;
+  max-width:740px;
+  height:5px;
+  background:var(--line);
+  border-radius:3px;
+  margin-top:26px;
+  overflow:hidden;
+}
+.progress-bar div{height:100%;background:var(--red);width:0;transition:width .2s;}
+.help{
+  margin-top:18px;
+  font-size:12px;
+  color:var(--text-dim);
+  letter-spacing:0.05em;
+}
+.help kbd{
+  font-family:inherit;
+  border:1px solid var(--line);
+  border-radius:3px;
+  padding:1px 7px;
+  margin:0 2px;
+  background:var(--panel);
+}
+@media (max-width:560px){
+  .card-text{font-size:20px;}
+  .card.answer .card-text{font-size:24px;}
+  h1{font-size:21px;}
+  .card{padding:36px 18px;min-height:280px;}
+  .help{display:none;}
+}
+@media (prefers-reduced-motion: reduce){
+  *{transition:none !important;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">M-1 GRAND PRIX 2001–2024</p>
+  <h1>いちもんいっとうカード<small>ゆうしょう・でばん・ひょう・しんさいん・かいとねん ― <span id="total-label"></span></small></h1>
+</header>
+
+<div class="filters" id="filters">
+  <button data-f="all" class="active">すべて</button>
+  <button data-f="優勝"><ruby>優勝<rt>ゆうしょう</rt></ruby></button>
+  <button data-f="出番・票"><ruby>出番<rt>でばん</rt></ruby>・<ruby>票<rt>ひょう</rt></ruby></button>
+  <button data-f="審査員"><ruby>審査員<rt>しんさいん</rt></ruby></button>
+  <button data-f="回・年"><ruby>回<rt>かい</rt></ruby>・<ruby>年<rt>とし</rt></ruby></button>
+  <button data-f="エントリー">エントリー</button>
+  <button data-f="きろく">きろく</button>
+  <button data-f="unlearned">まだのカード</button>
+  <button data-f="hard">がんばれカード</button>
+</div>
+
+<div class="status">
+  <span id="counter"></span>
+  <span class="learned-count" id="learned-count"></span>
+  <span class="badge" id="cat"></span>
+</div>
+
+<div class="card" id="card" tabindex="0" role="button" aria-label="カードをめくる">
+  <span class="learned-tag">✓ おぼえた</span>
+  <span class="hard-tag">💪 がんばれ</span>
+  <p class="side-label" id="side-label">もんだい</p>
+  <p class="card-text" id="card-text"></p>
+  <p class="card-note" id="card-note">タップかクリックでこたえ</p>
+</div>
+
+<div class="controls">
+  <button onclick="prev()">← まえへ</button>
+  <button class="primary" onclick="flip()">めくる</button>
+  <button onclick="next()">つぎへ →</button>
+  <button class="gold" onclick="toggleLearned()">おぼえた ✓</button>
+  <button class="fight" onclick="toggleHard()">がんばれ 💪</button>
+  <button onclick="shuffleCards()">シャッフル</button>
+  <button onclick="resetLearned()">きろくリセット</button>
+</div>
+
+<div class="progress-bar"><div id="progress"></div></div>
+
+<p class="help">
+  <kbd>Space</kbd> めくる　<kbd>←</kbd><kbd>→</kbd> いどう　<kbd>G</kbd> おぼえた　<kbd>H</kbd> がんばれ　<kbd>S</kbd> シャッフル
+</p>
+
+<script>
+const years = [
+{kai:1, y:2001, win:"中川家[なかがわけ]", ten:"829点[てん](1000点[てん]満点[まんてん])", ban:"1番[ばん](トップバッター)", hyo:"6票[ひょう]", ni:"ハリガネロック(1票[ひょう])", san:null},
+{kai:2, y:2002, win:"ますだおかだ", ten:"612点[てん]", ban:"2番[ばん]", hyo:"5票[ひょう]", ni:"フットボールアワー(2票[ひょう])", san:"笑[わら]い飯[めし](0票[ひょう])"},
+{kai:3, y:2003, win:"フットボールアワー", ten:"663点[てん]", ban:"7番[ばん]", hyo:"4票[ひょう]", ni:"笑[わら]い飯[めし](3票[ひょう])", san:"アンタッチャブル(0票[ひょう]・敗者復活[はいしゃふっかつ])"},
+{kai:4, y:2004, win:"アンタッチャブル", ten:"673点[てん]", ban:"8番[ばん]", hyo:"6票[ひょう]", ni:"南海[なんかい]キャンディーズ(1票[ひょう])", san:"麒麟[きりん](0票[ひょう])"},
+{kai:5, y:2005, win:"ブラックマヨネーズ", ten:"659点[てん]", ban:"5番[ばん]", hyo:"4票[ひょう]", ni:"笑[わら]い飯[めし](3票[ひょう])", san:"麒麟[きりん](0票[ひょう])"},
+{kai:6, y:2006, win:"チュートリアル", ten:"664点[てん]", ban:"6番[ばん]", hyo:"7票[ひょう](全員[ぜんいん]!)", ni:"フットボールアワー(0票[ひょう])", san:"麒麟[きりん](0票[ひょう])"},
+{kai:7, y:2007, win:"サンドウィッチマン", ten:"651点[てん]", ban:"9番[ばん](敗者復活[はいしゃふっかつ])", hyo:"4票[ひょう]", ni:"トータルテンボス(2票[ひょう])", san:"キングコング(1票[ひょう])"},
+{kai:8, y:2008, win:"NON STYLE", ten:"644点[てん]", ban:"7番[ばん]", hyo:"5票[ひょう]", ni:"オードリー(2票[ひょう]・敗者復活[はいしゃふっかつ])", san:"ナイツ(0票[ひょう])"},
+{kai:9, y:2009, win:"パンクブーブー", ten:"651点[てん]", ban:"8番[ばん]", hyo:"7票[ひょう](全員[ぜんいん]!)", ni:"笑[わら]い飯[めし](0票[ひょう])", san:"NON STYLE(0票[ひょう])"},
+{kai:10, y:2010, win:"笑[わら]い飯[めし]", ten:"668点[てん]", ban:"6番[ばん]", hyo:"4票[ひょう]", ni:"スリムクラブ(3票[ひょう])", san:"パンクブーブー(0票[ひょう])"},
+{kai:11, y:2015, win:"トレンディエンジェル", ten:null, ban:null, hyo:null, ni:"銀[ぎん]シャリ", san:"ジャルジャル"},
+{kai:12, y:2016, win:"銀[ぎん]シャリ", ten:"470点[てん](500点[てん]満点[まんてん])", ban:null, hyo:"3票[ひょう]", ni:"和牛[わぎゅう](1票[ひょう])", san:"スーパーマラドーナ(1票[ひょう])"},
+{kai:13, y:2017, win:"とろサーモン", ten:null, ban:null, hyo:null, ni:"和牛[わぎゅう]", san:"ミキ"},
+{kai:14, y:2018, win:"霜降[しもふ]り明星[みょうじょう]", ten:"662点[てん]", ban:null, hyo:null, ni:"和牛[わぎゅう]", san:"ジャルジャル"},
+{kai:15, y:2019, win:"ミルクボーイ", ten:"681点[てん](歴代[れきだい]1位[い]!)", ban:null, hyo:null, ni:"かまいたち", san:"ぺこぱ"},
+{kai:16, y:2020, win:"マヂカルラブリー", ten:"649点[てん]", ban:null, hyo:"3票[ひょう]", ni:"おいでやすこが", san:"見取[みと]り図[ず]"},
+{kai:17, y:2021, win:"錦鯉[にしきごい]", ten:"655点[てん]", ban:null, hyo:"5票[ひょう]", ni:"オズワルド(1票[ひょう])", san:"インディアンス(1票[ひょう])"},
+{kai:18, y:2022, win:"ウエストランド", ten:"659点[てん]", ban:null, hyo:"6票[ひょう]", ni:"さや香[か](1票[ひょう])", san:"ロングコートダディ(0票[ひょう])"},
+{kai:19, y:2023, win:"令和[れいわ]ロマン", ten:null, ban:"1番[ばん](トップバッター)", hyo:null, ni:"ヤーレンズ", san:"さや香[か]"},
+{kai:20, y:2024, win:"令和[れいわ]ロマン", ten:"850点[てん](900点[てん]満点[まんてん])", ban:"1番[ばん](トップバッター)", hyo:"5票[ひょう]", ni:"バッテリィズ", san:"真空[しんくう]ジェシカ"}
+];
+
+const kirokuCards = [
+{q:"完全優勝[かんぜんゆうしょう](1位[い]通過[つうか]+全員[ぜんいん]の票[ひょう])をしたコンビは?", a:"チュートリアル(2006年[ねん])だけ"},
+{q:"最終決戦[さいしゅうけっせん]で審査員[しんさいん]全員[ぜんいん]の票[ひょう]をとった2組[くみ]は?", a:"チュートリアル(2006)と\nパンクブーブー(2009)"},
+{q:"はじめて敗者復活[はいしゃふっかつ]から優勝[ゆうしょう]したのは?", a:"サンドウィッチマン(2007年[ねん])"},
+{q:"敗者復活[はいしゃふっかつ]からの優勝[ゆうしょう]、2組[くみ]目[め]は?", a:"トレンディエンジェル(2015年[ねん])"},
+{q:"ただ1回[かい]だけの100点[てん]を出[だ]した審査員[しんさいん]は?", a:"島田紳助[しまだしんすけ](2009年[ねん])"},
+{q:"100点[てん]をもらったコンビは?", a:"笑[わら]い飯[めし](2009年[ねん])"},
+{q:"決勝[けっしょう]にいちばん多[おお]く出[で]たコンビは?", a:"笑[わら]い飯[めし](9回[かい]連続[れんぞく])"},
+{q:"史上[しじょう]最年少[さいねんしょう]優勝[ゆうしょう]は?", a:"霜降[しもふ]り明星[みょうじょう](2018年[ねん])"},
+{q:"史上[しじょう]最年長[さいねんちょう]優勝[ゆうしょう]は?", a:"錦鯉[にしきごい](2021年[ねん])"},
+{q:"史上初[しじょうはつ]の2連覇[れんぱ]をしたのは?", a:"令和[れいわ]ロマン(2023・2024年[ねん])"},
+{q:"トップバッター(1番[ばん])で優勝[ゆうしょう]したのは?", a:"中川家[なかがわけ](2001)と\n令和[れいわ]ロマン(2023・2024)"},
+{q:"3年[ねん]連続[れんぞく]で3位[い]だったコンビは?", a:"麒麟[きりん](2004〜2006年[ねん])"},
+{q:"いちばん多[おお]く審査員[しんさいん]をやった人[ひと]は?", a:"松本人志[まつもとひとし]"},
+{q:"エントリーがいちばん多[おお]かった年[とし]は?", a:"2024年[ねん](10330組[くみ])"},
+{q:"エントリーがいちばん少[すく]なかった年[とし]は?", a:"2001年[ねん](1603組[くみ])"}
+];
+
+const judges = {
+2001:"西川[にしかわ]きよし\n青島幸男[あおしまゆきお]\n春風亭小朝[しゅんぷうていこあさ]\nラサール石井[いしい]\n鴻上尚史[こうかみしょうじ]\n松本人志[まつもとひとし]\n島田紳助[しまだしんすけ]",
+2002:"立川談志[たてかわだんし]\n中田[なかた]カウス\n島田洋七[しまだようしち]\nラサール石井[いしい]\n大竹[おおたけ]まこと\n松本人志[まつもとひとし]\n島田紳助[しまだしんすけ]",
+2003:"中田[なかた]カウス\n大竹[おおたけ]まこと\nラサール石井[いしい]\n島田洋七[しまだようしち]\n南原清隆[なんばらきよたか]\n松本人志[まつもとひとし]\n島田紳助[しまだしんすけ]",
+2004:"中田[なかた]カウス\nラサール石井[いしい]\n春風亭小朝[しゅんぷうていこあさ]\n島田洋七[しまだようしち]\n大竹[おおたけ]まこと\n南原清隆[なんばらきよたか]\n西川[にしかわ]きよし",
+2005:"中田[なかた]カウス\nラサール石井[いしい]\n島田洋七[しまだようしち]\n大竹[おおたけ]まこと\n渡辺正行[わたなべまさゆき]\n松本人志[まつもとひとし]\n島田紳助[しまだしんすけ]",
+2006:"中田[なかた]カウス\n大竹[おおたけ]まこと\n島田洋七[しまだようしち]\n渡辺正行[わたなべまさゆき]\n南原清隆[なんばらきよたか]\n松本人志[まつもとひとし]\n島田紳助[しまだしんすけ]",
+2007:"中田[なかた]カウス\n大竹[おおたけ]まこと\nオール巨人[きょじん]\nラサール石井[いしい]\n上沼恵美子[かみぬまえみこ]\n松本人志[まつもとひとし]\n島田紳助[しまだしんすけ]",
+2008:"中田[なかた]カウス\n大竹[おおたけ]まこと\nオール巨人[きょじん]\n渡辺正行[わたなべまさゆき]\n上沼恵美子[かみぬまえみこ]\n松本人志[まつもとひとし]\n島田紳助[しまだしんすけ]",
+2009:"中田[なかた]カウス\n渡辺正行[わたなべまさゆき]\nオール巨人[きょじん]\n東国原英夫[ひがしこくばるひでお]\n上沼恵美子[かみぬまえみこ]\n松本人志[まつもとひとし]\n島田紳助[しまだしんすけ]",
+2010:"中田[なかた]カウス\n宮迫博之[みやさこひろゆき]\n渡辺正行[わたなべまさゆき]\n大竹[おおたけ]まこと\n南原清隆[なんばらきよたか]\n松本人志[まつもとひとし]\n島田紳助[しまだしんすけ]",
+2015:"礼二[れいじ](中川家[なかがわけ])\n増田英彦[ますだひでひこ](ますだおかだ)\n岩尾望[いわおのぞむ](フットボールアワー)\n吉田敬[よしだたかし](ブラックマヨネーズ)\n徳井義実[とくいよしみ](チュートリアル)\n富澤[とみざわ]たけし(サンドウィッチマン)\n石田明[いしだあきら](NON STYLE)\n佐藤哲夫[さとうてつお](パンクブーブー)\n哲夫[てつお](笑[わら]い飯[めし])",
+2016:"松本人志[まつもとひとし]\nオール巨人[きょじん]\n上沼恵美子[かみぬまえみこ]\n礼二[れいじ]\n博多大吉[はかただいきち]",
+2017:"松本人志[まつもとひとし]\nオール巨人[きょじん]\n上沼恵美子[かみぬまえみこ]\n礼二[れいじ]\n博多大吉[はかただいきち]\n春風亭小朝[しゅんぷうていこあさ]\n渡辺正行[わたなべまさゆき]",
+2018:"松本人志[まつもとひとし]\n上沼恵美子[かみぬまえみこ]\nオール巨人[きょじん]\n博多大吉[はかただいきち]\n礼二[れいじ]\n立川志[たてかわし]らく\n塙宣之[はなわのぶゆき]",
+2019:"松本人志[まつもとひとし]\n上沼恵美子[かみぬまえみこ]\nオール巨人[きょじん]\n博多大吉[はかただいきち]\n礼二[れいじ]\n立川志[たてかわし]らく\n塙宣之[はなわのぶゆき]",
+2020:"松本人志[まつもとひとし]\n上沼恵美子[かみぬまえみこ]\nオール巨人[きょじん]\n博多大吉[はかただいきち]\n礼二[れいじ]\n立川志[たてかわし]らく\n塙宣之[はなわのぶゆき]",
+2021:"松本人志[まつもとひとし]\n上沼恵美子[かみぬまえみこ]\nオール巨人[きょじん]\n富澤[とみざわ]たけし\n礼二[れいじ]\n立川志[たてかわし]らく\n塙宣之[はなわのぶゆき]",
+2022:"松本人志[まつもとひとし]\n山田邦子[やまだくにこ]\nオール巨人[きょじん]\n富澤[とみざわ]たけし\n礼二[れいじ]\n塙宣之[はなわのぶゆき]\n博多大吉[はかただいきち]",
+2023:"松本人志[まつもとひとし]\nオール巨人[きょじん]\n富澤[とみざわ]たけし\n礼二[れいじ]\n塙宣之[はなわのぶゆき]\n博多大吉[はかただいきち]\n海原[うなばら]ともこ",
+2024:"礼二[れいじ]\n塙宣之[はなわのぶゆき]\n博多大吉[はかただいきち]\n石田明[いしだあきら]\n哲夫[てつお](笑[わら]い飯[めし])\n海原[うなばら]ともこ\n柴田英嗣[しばたひでつぐ](アンタッチャブル)\n山内健司[やまうちけんじ](かまいたち)\n若林正恭[わかばやしまさやす](オードリー)"
+};
+
+const entries = {
+2001:"1603組[くみ]",
+2002:"1756組[くみ]",
+2003:"1906組[くみ]",
+2004:"2617組[くみ]",
+2005:"3378組[くみ]",
+2006:"3922組[くみ]",
+2007:"4239組[くみ]",
+2008:"4489組[くみ]",
+2009:"4629組[くみ]",
+2010:"4835組[くみ]",
+2015:"3472組[くみ]",
+2016:"3503組[くみ]",
+2017:"4094組[くみ]",
+2018:"4640組[くみ]",
+2019:"5040組[くみ]",
+2020:"5081組[くみ]",
+2021:"6017組[くみ]",
+2022:"7261組[くみ]",
+2023:"8540組[くみ]",
+2024:"10330組[くみ]"
+};
+
+const cards = [];
+years.forEach(d=>{
+  cards.push({c:"優勝", q:`${d.y}年[ねん]の優勝[ゆうしょう]は?`, a:d.win});
+  if(d.ban) cards.push({c:"出番・票", q:`${d.y}年[ねん]、${d.win}の出番[でばん]は?`, a:d.ban});
+  if(d.hyo) cards.push({c:"出番・票", q:`${d.y}年[ねん]の最終決戦[さいしゅうけっせん]、${d.win}は何票[なんびょう]?`, a:d.hyo});
+  if(judges[d.y]){
+    const n = judges[d.y].split("\n").length;
+    cards.push({c:"審査員", q:`${d.y}年[ねん]の審査員[しんさいん](${n}人[にん])は?`, a:judges[d.y]});
+  }
+  cards.push({c:"回・年", q:`第[だい]${d.kai}回[かい]は何年[なんねん]?`, a:`${d.y}年[ねん]`});
+  cards.push({c:"回・年", q:`${d.y}年[ねん]は第何回[だいなんかい]?`, a:`第[だい]${d.kai}回[かい]`});
+  if(entries[d.y]) cards.push({c:"エントリー", q:`${d.y}年[ねん]のエントリーは何組[なんくみ]?`, a:entries[d.y]});
+});
+cards.push({c:"回・年", q:"2011〜2014年[ねん]のM-1は?", a:"おやすみ(なかった)\n2010年[ねん]でいったんおわり、\n2015年[ねん]にふっかつ"});
+kirokuCards.forEach(k=>cards.push({c:"きろく", q:k.q, a:k.a}));
+
+const catLabels = {
+  "優勝":"優勝[ゆうしょう]",
+  "出番・票":"出番[でばん]・票[ひょう]",
+  "審査員":"審査員[しんさいん]",
+  "回・年":"回[かい]・年[とし]",
+  "エントリー":"エントリー",
+  "きろく":"きろく"
+};
+
+function rubyfy(s){
+  return s
+    .replace(/([\u4E00-\u9FFF\u3400-\u4DBF々〆]+)\[([^\]]+)\]/g, '<ruby>$1<rt>$2</rt></ruby>')
+    .replace(/\n/g, '<br>');
+}
+
+let learned = new Set();
+let hard = new Set();
+try{
+  const saved = localStorage.getItem('m1-ichimon-learned');
+  if(saved) learned = new Set(JSON.parse(saved));
+  const savedHard = localStorage.getItem('m1-ichimon-hard');
+  if(savedHard) hard = new Set(JSON.parse(savedHard));
+}catch(e){}
+
+function saveLearned(){
+  try{
+    localStorage.setItem('m1-ichimon-learned', JSON.stringify([...learned]));
+    localStorage.setItem('m1-ichimon-hard', JSON.stringify([...hard]));
+  }catch(e){}
+}
+
+let filter = 'all';
+let pool = [];
+let idx = 0, showAnswer = false;
+
+const $ = id => document.getElementById(id);
+
+document.getElementById('total-label').textContent = 'ぜんぶで' + cards.length + 'まい';
+
+function buildPool(){
+  pool = cards.map((_,i)=>i).filter(i=>{
+    if(filter==='all') return true;
+    if(filter==='unlearned') return !learned.has(i);
+    if(filter==='hard') return hard.has(i);
+    return cards[i].c===filter;
+  });
+  if(pool.length===0) pool = cards.map((_,i)=>i);
+  idx = 0; showAnswer = false;
+}
+
+function setFilter(f, btn){
+  filter = f;
+  document.querySelectorAll('.filters button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildPool();
+  render();
+}
+
+document.querySelectorAll('.filters button').forEach(b=>{
+  b.addEventListener('click', ()=>setFilter(b.dataset.f, b));
+});
+
+function render(){
+  const ci = pool[idx];
+  const c = cards[ci];
+  $('counter').textContent = (idx+1) + ' / ' + pool.length;
+  $('learned-count').innerHTML = 'おぼえた: ' + learned.size + ' / ' + cards.length + '　<span style="color:#f0857c;">💪 ' + hard.size + '</span>';
+  $('cat').innerHTML = rubyfy(catLabels[c.c] || c.c);
+  $('side-label').textContent = showAnswer ? 'こたえ' : 'もんだい';
+  const txt = showAnswer ? c.a : c.q;
+  $('card-text').innerHTML = rubyfy(txt);
+  $('card-text').style.fontSize = (showAnswer && txt.length > 60) ? '19px' : '';
+  $('card-note').textContent = showAnswer ? 'タップかクリックでもんだいにもどる' : 'タップかクリックでこたえ';
+  $('card').classList.toggle('answer', showAnswer);
+  $('card').classList.toggle('is-learned', learned.has(ci));
+  $('card').classList.toggle('is-hard', hard.has(ci));
+  $('progress').style.width = ((idx+1)/pool.length*100) + '%';
+}
+
+function flip(){ showAnswer = !showAnswer; render(); }
+function next(){ idx = (idx+1) % pool.length; showAnswer = false; render(); }
+function prev(){ idx = (idx-1+pool.length) % pool.length; showAnswer = false; render(); }
+function toggleLearned(){
+  const ci = pool[idx];
+  if(learned.has(ci)){ learned.delete(ci); }
+  else { learned.add(ci); hard.delete(ci); }
+  saveLearned(); render();
+}
+function toggleHard(){
+  const ci = pool[idx];
+  if(hard.has(ci)){ hard.delete(ci); }
+  else { hard.add(ci); learned.delete(ci); }
+  saveLearned(); render();
+}
+function shuffleCards(){
+  for(let i=pool.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [pool[i],pool[j]]=[pool[j],pool[i]];
+  }
+  idx = 0; showAnswer = false; render();
+}
+function resetLearned(){
+  if(confirm('「おぼえた」と「がんばれ」のきろくをぜんぶけしますか?')){
+    learned.clear(); hard.clear(); saveLearned(); render();
+  }
+}
+
+$('card').addEventListener('click', flip);
+document.addEventListener('keydown', e=>{
+  if(e.code==='Space'){ e.preventDefault(); flip(); }
+  else if(e.key==='ArrowRight'){ next(); }
+  else if(e.key==='ArrowLeft'){ prev(); }
+  else if(e.key==='g' || e.key==='G'){ toggleLearned(); }
+  else if(e.key==='h' || e.key==='H'){ toggleHard(); }
+  else if(e.key==='s' || e.key==='S'){ shuffleCards(); }
+});
+
+buildPool();
+render();
+</script>
+</body>
+</html>
