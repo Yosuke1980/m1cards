@@ -877,14 +877,12 @@ function answerQuiz(btn, ok){
     if(c.votes){
       $('card-text').innerHTML = voteRevealHTML(c.votes);
       $('card-note').textContent = 'とうひょうオープン!';
-    }else if(!ok){
+    }else{
       $('card').classList.add('answer');
       $('side-label').textContent = 'こたえ';
       $('card-text').innerHTML = rubyfy(c.a);
       $('card-text').style.fontSize = c.a.length > 60 ? '19px' : '';
-      $('card-note').textContent = 'こたえは これ!';
-    }else{
-      $('card-note').textContent = 'せいかい! 🎉';
+      $('card-note').textContent = ok ? 'せいかい! 🎉' : 'こたえは これ!';
     }
     showNextButton();
   }, ok ? 'win' : 'lose', cap);
