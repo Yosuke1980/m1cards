@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#111013">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>M-1グランプリ いちもんいっとうカード</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +23,8 @@
   --text:#f2efe9;
   --text-dim:#a49e94;
 }
-*{margin:0;padding:0;box-sizing:border-box;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+button,.card{touch-action:manipulation;}
 body{
   background:var(--bg);
   color:var(--text);
@@ -56,6 +60,28 @@ h1{
   line-height:1.6;
 }
 h1 small{display:block;font-size:13px;font-weight:400;color:var(--text-dim);margin-top:6px;letter-spacing:0.05em;line-height:2;}
+.mode-toggle{
+  width:100%;
+  max-width:740px;
+  display:flex;
+  gap:8px;
+  margin-bottom:14px;
+}
+.mode-toggle button{
+  flex:1;
+  font-family:inherit;
+  font-size:14px;
+  font-weight:700;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--text-dim);
+  cursor:pointer;
+  transition:all .15s;
+  line-height:1.6;
+}
+.mode-toggle button.active{background:var(--gold);border-color:var(--gold);color:#1a1408;}
 .filters{
   display:flex;
   gap:8px;
@@ -77,7 +103,7 @@ h1 small{display:block;font-size:13px;font-weight:400;color:var(--text-dim);marg
   transition:all .15s;
   line-height:1.6;
 }
-.filters button:hover{border-color:var(--red);color:var(--text);}
+@media (hover:hover){.filters button:hover{border-color:var(--red);color:var(--text);}}
 .filters button.active{background:var(--red);border-color:var(--red);color:#fff;}
 .status{
   width:100%;
@@ -120,7 +146,7 @@ h1 small{display:block;font-size:13px;font-weight:400;color:var(--text-dim);marg
   user-select:none;
   transition:border-color .15s;
 }
-.card:hover{border-color:var(--red);border-top-color:var(--red);}
+@media (hover:hover){.card:hover{border-color:var(--red);border-top-color:var(--red);}}
 .card.answer{border-top-color:var(--gold);background:var(--panel-2);}
 .side-label{
   font-size:14px;
@@ -172,13 +198,15 @@ h1 small{display:block;font-size:13px;font-weight:400;color:var(--text-dim);marg
   cursor:pointer;
   transition:all .15s;
 }
-.controls button:hover{border-color:var(--text-dim);background:var(--panel-2);}
 .controls button.primary{background:var(--red);border-color:var(--red);color:#fff;}
-.controls button.primary:hover{background:#e2483d;}
 .controls button.gold{border-color:var(--gold);color:var(--gold);}
-.controls button.gold:hover{background:var(--gold);color:#1a1408;}
 .controls button.fight{border-color:#e2483d;color:#f0857c;}
-.controls button.fight:hover{background:var(--red);color:#fff;}
+@media (hover:hover){
+  .controls button:hover{border-color:var(--text-dim);background:var(--panel-2);}
+  .controls button.primary:hover{background:#e2483d;}
+  .controls button.gold:hover{background:var(--gold);color:#1a1408;}
+  .controls button.fight:hover{background:var(--red);color:#fff;}
+}
 .hard-tag{
   position:absolute;
   top:14px;
@@ -192,6 +220,56 @@ h1 small{display:block;font-size:13px;font-weight:400;color:var(--text-dim);marg
   display:none;
 }
 .card.is-hard .hard-tag{display:block;}
+.choices{
+  display:none;
+  width:100%;
+  max-width:740px;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:16px;
+}
+body.quiz-mode .choices{display:grid;}
+body.quiz-mode .controls,
+body.quiz-mode .help{display:none;}
+body.quiz-mode .card{min-height:200px;cursor:default;}
+body.quiz-mode .filters button[data-f="審査員"]{display:none;}
+.choices button{
+  font-family:inherit;
+  font-size:15px;
+  font-weight:700;
+  line-height:1.9;
+  padding:16px 12px;
+  border-radius:10px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--text);
+  cursor:pointer;
+  transition:all .15s;
+}
+@media (hover:hover){.choices button:hover:not(:disabled){border-color:var(--red);}}
+.choices button.correct{background:#2f7d4a;border-color:#2f7d4a;color:#fff;}
+.choices button.wrong{background:var(--red-deep);border-color:var(--red-deep);color:#fff;}
+.choices button:disabled{cursor:default;}
+.pop-emoji{
+  position:absolute;
+  top:40%;left:50%;
+  font-size:60px;
+  pointer-events:none;
+  animation:pop .8s ease-out forwards;
+}
+@keyframes pop{
+  0%{transform:translate(-50%,-50%) scale(.3);opacity:0;}
+  30%{transform:translate(-50%,-60%) scale(1.2);opacity:1;}
+  100%{transform:translate(-50%,-130%) scale(1);opacity:0;}
+}
+.shake{animation:shake .4s;}
+@keyframes shake{
+  0%,100%{transform:translateX(0);}
+  20%{transform:translateX(-8px);}
+  40%{transform:translateX(8px);}
+  60%{transform:translateX(-5px);}
+  80%{transform:translateX(5px);}
+}
 .progress-bar{
   width:100%;
   max-width:740px;
@@ -216,15 +294,45 @@ h1 small{display:block;font-size:13px;font-weight:400;color:var(--text-dim);marg
   margin:0 2px;
   background:var(--panel);
 }
-@media (max-width:560px){
-  .card-text{font-size:20px;}
-  .card.answer .card-text{font-size:24px;}
-  h1{font-size:21px;}
-  .card{padding:36px 18px;min-height:280px;}
+@media (min-width:561px) and (max-width:1080px) and (pointer:coarse){
+  .filters button{padding:12px 22px;font-size:15px;}
+  .controls button{padding:17px 26px;font-size:16px;border-radius:10px;}
+  .card{min-height:380px;}
+  .card-text{font-size:30px;}
+  .card.answer .card-text{font-size:34px;}
+  .choices button{padding:20px 16px;font-size:17px;}
   .help{display:none;}
 }
+@media (max-width:560px){
+  body{padding:16px 12px calc(180px + env(safe-area-inset-bottom));}
+  header{margin-bottom:14px;}
+  h1{font-size:19px;}
+  .filters{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-bottom:12px;padding-bottom:4px;}
+  .filters::-webkit-scrollbar{display:none;}
+  .filters button{flex:0 0 auto;padding:9px 15px;font-size:13px;}
+  .card-text{font-size:20px;}
+  .card.answer .card-text{font-size:24px;}
+  .card{padding:32px 16px;min-height:300px;}
+  .card-note{margin-top:18px;}
+  .controls{
+    position:fixed;left:0;right:0;bottom:0;z-index:10;
+    max-width:none;margin-top:0;
+    background:rgba(17,16,19,.97);
+    border-top:1px solid var(--line);
+    padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+    display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:8px;
+  }
+  .controls button{padding:14px 4px;font-size:14px;border-radius:10px;}
+  .controls button.primary{font-size:16px;}
+  .controls button:last-child{grid-column:1 / -1;padding:7px;font-size:12px;color:var(--text-dim);background:transparent;border-color:transparent;}
+  .progress-bar{margin-top:16px;}
+  .help{display:none;}
+  .choices{grid-template-columns:1fr;gap:8px;margin-top:12px;}
+  .choices button{padding:13px 10px;font-size:14px;}
+  body.quiz-mode{padding-bottom:36px;}
+}
 @media (prefers-reduced-motion: reduce){
-  *{transition:none !important;}
+  *{transition:none !important;animation:none !important;}
 }
 </style>
 </head>
@@ -234,6 +342,11 @@ h1 small{display:block;font-size:13px;font-weight:400;color:var(--text-dim);marg
   <p class="eyebrow">M-1 GRAND PRIX 2001–2024</p>
   <h1>いちもんいっとうカード<small>ゆうしょう・でばん・ひょう・しんさいん・かいとねん ― <span id="total-label"></span></small></h1>
 </header>
+
+<div class="mode-toggle" id="mode-toggle">
+  <button data-m="card" class="active">カードでおぼえる</button>
+  <button data-m="quiz">4たくクイズ 🔥</button>
+</div>
 
 <div class="filters" id="filters">
   <button data-f="all" class="active">すべて</button>
@@ -260,6 +373,8 @@ h1 small{display:block;font-size:13px;font-weight:400;color:var(--text-dim);marg
   <p class="card-text" id="card-text"></p>
   <p class="card-note" id="card-note">タップかクリックでこたえ</p>
 </div>
+
+<div class="choices" id="choices"></div>
 
 <div class="controls">
   <button onclick="prev()">← まえへ</button>
@@ -422,12 +537,19 @@ document.getElementById('total-label').textContent = 'ぜんぶで' + cards.leng
 
 function buildPool(){
   pool = cards.map((_,i)=>i).filter(i=>{
+    if(mode==='quiz' && cards[i].c==='審査員') return false;
     if(filter==='all') return true;
     if(filter==='unlearned') return !learned.has(i);
     if(filter==='hard') return hard.has(i);
     return cards[i].c===filter;
   });
-  if(pool.length===0) pool = cards.map((_,i)=>i);
+  if(pool.length===0) pool = cards.map((_,i)=>i).filter(i=>mode!=='quiz'||cards[i].c!=='審査員');
+  if(mode==='quiz'){
+    for(let i=pool.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [pool[i],pool[j]]=[pool[j],pool[i]];
+    }
+  }
   idx = 0; showAnswer = false;
 }
 
@@ -444,6 +566,11 @@ document.querySelectorAll('.filters button').forEach(b=>{
 });
 
 function render(){
+  if(mode==='quiz'){ renderQuiz(); return; }
+  renderCard();
+}
+
+function renderCard(){
   const ci = pool[idx];
   const c = cards[ci];
   $('counter').textContent = (idx+1) + ' / ' + pool.length;
@@ -460,9 +587,105 @@ function render(){
   $('progress').style.width = ((idx+1)/pool.length*100) + '%';
 }
 
-function flip(){ showAnswer = !showAnswer; render(); }
-function next(){ idx = (idx+1) % pool.length; showAnswer = false; render(); }
-function prev(){ idx = (idx-1+pool.length) % pool.length; showAnswer = false; render(); }
+let mode = 'card';
+let quizLock = false;
+let qScore = 0, qTotal = 0, qStreak = 0;
+
+document.querySelectorAll('.mode-toggle button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    if(mode===b.dataset.m) return;
+    mode = b.dataset.m;
+    document.querySelectorAll('.mode-toggle button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.body.classList.toggle('quiz-mode', mode==='quiz');
+    if(mode==='quiz' && filter==='審査員'){
+      filter='all';
+      document.querySelectorAll('.filters button').forEach(x=>x.classList.toggle('active', x.dataset.f==='all'));
+    }
+    buildPool(); render();
+  });
+});
+
+function quizStatus(){
+  $('learned-count').innerHTML = 'せいかい ' + qScore + ' / ' + qTotal +
+    (qStreak>=2 ? '　<span style="color:#f0857c;">🔥' + qStreak + 'れんぞく</span>' : '');
+}
+
+function renderQuiz(){
+  const c = cards[pool[idx]];
+  $('counter').textContent = 'もんだい ' + (idx+1) + ' / ' + pool.length;
+  quizStatus();
+  $('cat').innerHTML = rubyfy(catLabels[c.c] || c.c);
+  $('side-label').textContent = 'もんだい';
+  $('card-text').innerHTML = rubyfy(c.q);
+  $('card-text').style.fontSize = '';
+  $('card-note').textContent = 'したの4つからえらんでね';
+  $('card').classList.remove('answer');
+  $('card').classList.toggle('is-learned', learned.has(pool[idx]));
+  $('card').classList.toggle('is-hard', hard.has(pool[idx]));
+  $('progress').style.width = ((idx+1)/pool.length*100) + '%';
+  buildChoices(c);
+}
+
+function similarType(a,b){
+  return a.includes('年[ねん]')===b.includes('年[ねん]') && a.startsWith('第')===b.startsWith('第');
+}
+
+function buildChoices(c){
+  const el = $('choices');
+  el.innerHTML = ''; quizLock = false;
+  let cands = [...new Set(cards.filter(x=>x.c===c.c && x.a!==c.a && similarType(c.a,x.a)).map(x=>x.a))];
+  if(cands.length<3) cands = [...new Set(cards.filter(x=>x.a!==c.a && x.c!=='審査員').map(x=>x.a))];
+  for(let i=cands.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [cands[i],cands[j]]=[cands[j],cands[i]];
+  }
+  const opts = [c.a, ...cands.slice(0,3)];
+  for(let i=opts.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [opts[i],opts[j]]=[opts[j],opts[i]];
+  }
+  opts.forEach(a=>{
+    const b = document.createElement('button');
+    b.innerHTML = rubyfy(a);
+    b.dataset.a = a;
+    b.addEventListener('click', ()=>answerQuiz(b, a===c.a));
+    el.appendChild(b);
+  });
+}
+
+function answerQuiz(btn, ok){
+  if(quizLock) return;
+  quizLock = true; qTotal++;
+  const correct = cards[pool[idx]].a;
+  [...$('choices').children].forEach(b=>{
+    b.disabled = true;
+    if(b.dataset.a===correct) b.classList.add('correct');
+  });
+  if(ok){
+    qScore++; qStreak++;
+    popEmoji(qStreak>=3 ? '🔥' : '🎉');
+  }else{
+    qStreak = 0;
+    btn.classList.add('wrong');
+    $('card').classList.add('shake');
+    setTimeout(()=>$('card').classList.remove('shake'), 500);
+  }
+  quizStatus();
+  setTimeout(()=>{ idx=(idx+1)%pool.length; render(); }, ok?900:1800);
+}
+
+function popEmoji(ch){
+  const s = document.createElement('span');
+  s.className = 'pop-emoji';
+  s.textContent = ch;
+  $('card').appendChild(s);
+  setTimeout(()=>s.remove(), 900);
+}
+
+function flip(){ if(mode==='quiz') return; showAnswer = !showAnswer; render(); }
+function next(){ if(mode==='quiz'&&quizLock) return; idx = (idx+1) % pool.length; showAnswer = false; render(); }
+function prev(){ if(mode==='quiz'&&quizLock) return; idx = (idx-1+pool.length) % pool.length; showAnswer = false; render(); }
 function toggleLearned(){
   const ci = pool[idx];
   if(learned.has(ci)){ learned.delete(ci); }
@@ -489,6 +712,17 @@ function resetLearned(){
 }
 
 $('card').addEventListener('click', flip);
+
+let touchX=null, touchY=null;
+$('card').addEventListener('touchstart', e=>{
+  touchX=e.changedTouches[0].clientX; touchY=e.changedTouches[0].clientY;
+},{passive:true});
+$('card').addEventListener('touchend', e=>{
+  if(touchX===null) return;
+  const dx=e.changedTouches[0].clientX-touchX, dy=e.changedTouches[0].clientY-touchY;
+  touchX=null;
+  if(Math.abs(dx)>50 && Math.abs(dx)>Math.abs(dy)*1.5){ dx<0?next():prev(); }
+},{passive:true});
 document.addEventListener('keydown', e=>{
   if(e.code==='Space'){ e.preventDefault(); flip(); }
   else if(e.key==='ArrowRight'){ next(); }
