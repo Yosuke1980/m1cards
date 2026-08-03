@@ -441,16 +441,21 @@ body.quiz-mode .filters button[data-f="審査員"]{display:none;}
   .help{display:none;}
 }
 @media (max-width:560px){
-  body{padding:16px 12px calc(180px + env(safe-area-inset-bottom));}
-  header{margin-bottom:14px;}
-  h1{font-size:19px;}
-  .filters{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-bottom:12px;padding-bottom:4px;}
+  body{padding:10px 12px calc(180px + env(safe-area-inset-bottom));}
+  header{margin-bottom:8px;}
+  h1{font-size:17px;}
+  h1 small{display:none;}
+  .eyebrow{margin-bottom:3px;}
+  .mode-toggle{margin-bottom:8px;}
+  .mode-toggle button{padding:9px;font-size:13px;}
+  .filters{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-bottom:8px;padding-bottom:4px;}
   .filters::-webkit-scrollbar{display:none;}
   .filters button{flex:0 0 auto;padding:9px 15px;font-size:13px;}
+  .status{margin-bottom:6px;font-size:12px;}
   .card-text{font-size:20px;}
   .card.answer .card-text{font-size:24px;}
-  .card{padding:32px 16px;min-height:300px;}
-  .card-note{margin-top:18px;}
+  .card{padding:28px 16px;min-height:240px;}
+  .card-note{margin-top:14px;}
   .controls{
     position:fixed;left:0;right:0;bottom:0;z-index:10;
     max-width:none;margin-top:0;
@@ -462,11 +467,21 @@ body.quiz-mode .filters button[data-f="審査員"]{display:none;}
   .controls button{padding:14px 4px;font-size:14px;border-radius:10px;}
   .controls button.primary{font-size:16px;}
   .controls button:last-child{grid-column:1 / -1;padding:7px;font-size:12px;color:var(--text-dim);background:transparent;border-color:transparent;}
-  .progress-bar{margin-top:16px;}
+  .progress-bar{margin-top:10px;}
   .help{display:none;}
-  .choices{grid-template-columns:1fr;gap:8px;margin-top:12px;}
+  .choices{grid-template-columns:1fr;gap:7px;margin-top:10px;}
   .choices button{padding:13px 12px;font-size:14px;}
-  body.quiz-mode{padding-bottom:36px;}
+  body.quiz-mode{padding-bottom:calc(64px + env(safe-area-inset-bottom));}
+  body.quiz-mode .card{min-height:150px;padding:20px 14px;}
+  body.quiz-mode .card-text{font-size:18px;line-height:2;}
+  body.quiz-mode .card.answer .card-text{font-size:21px;}
+  body.quiz-mode .card-note{margin-top:10px;font-size:12px;}
+  body.quiz-mode .choices button{padding:11px 12px;font-size:13px;line-height:1.7;}
+  body.quiz-mode .choices button.next-q{
+    position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));
+    z-index:10;padding:14px;font-size:15px;
+    box-shadow:0 8px 24px rgba(0,0,0,.55);
+  }
 }
 @media (prefers-reduced-motion: reduce){
   *{transition:none !important;animation:none !important;}
@@ -641,6 +656,9 @@ const entries = {
 2025:"11521組[くみ]"
 };
 
+const kaiToYearNote = "💡 2011〜2014年[ねん]はおやすみ(4年[ねん]ぶん)なので、11回[かい]からずれる!\n第[だい]10回[かい]までは「回[かい]+2000=年[ねん]」\n第[だい]11回[かい]からは「回[かい]+2004=年[ねん]」";
+const yearToKaiNote = "💡 2011〜2014年[ねん]はおやすみ(4年[ねん]ぶん)なので、2015年[ねん]からずれる!\n2010年[ねん]までは「年[ねん]−2000=回[かい]」\n2015年[ねん]からは「年[ねん]−2004=回[かい]」";
+
 const cards = [];
 years.forEach(d=>{
   cards.push({c:"優勝", q:`${d.y}年[ねん]の優勝[ゆうしょう]は?`, a:d.win});
@@ -657,8 +675,8 @@ years.forEach(d=>{
     const n = judges[d.y].split("\n").length;
     cards.push({c:"審査員", q:`${d.y}年[ねん]の審査員[しんさいん](${n}人[にん])は?`, a:judges[d.y]});
   }
-  cards.push({c:"回・年", q:`第[だい]${d.kai}回[かい]は何年[なんねん]?`, a:`${d.y}年[ねん]`});
-  cards.push({c:"回・年", q:`${d.y}年[ねん]は第何回[だいなんかい]?`, a:`第[だい]${d.kai}回[かい]`});
+  cards.push({c:"回・年", q:`第[だい]${d.kai}回[かい]は何年[なんねん]?`, a:`${d.y}年[ねん]`, note:kaiToYearNote});
+  cards.push({c:"回・年", q:`${d.y}年[ねん]は第何回[だいなんかい]?`, a:`第[だい]${d.kai}回[かい]`, note:yearToKaiNote});
   if(entries[d.y]) cards.push({c:"エントリー", q:`${d.y}年[ねん]のエントリーは何組[なんくみ]?`, a:entries[d.y]});
 });
 cards.push({c:"回・年", q:"2011〜2014年[ねん]のM-1[エムワン]は?", a:"おやすみ(なかった)\n2010年[ねん]でいったんおわり、\n2015年[ねん]にふっかつ", alt:["ふつうにやっていた","夏[なつ]にやっていた","ラジオだけでやっていた"]});
@@ -756,7 +774,11 @@ function renderCard(){
     $('card-text').innerHTML = rubyfy(txt);
     $('card-text').style.fontSize = (showAnswer && txt.length > 60) ? '19px' : '';
   }
-  $('card-note').textContent = showAnswer ? 'タップかクリックでもんだいにもどる' : 'タップかクリックでこたえ';
+  if(showAnswer && c.note){
+    $('card-note').innerHTML = rubyfy(c.note);
+  }else{
+    $('card-note').textContent = showAnswer ? 'タップかクリックでもんだいにもどる' : 'タップかクリックでこたえ';
+  }
   $('card').classList.toggle('answer', showAnswer);
   $('card').classList.toggle('is-learned', learned.has(ci));
   $('card').classList.toggle('is-hard', hard.has(ci));
@@ -882,7 +904,7 @@ function answerQuiz(btn, ok){
       $('side-label').textContent = 'こたえ';
       $('card-text').innerHTML = rubyfy(c.a);
       $('card-text').style.fontSize = c.a.length > 60 ? '19px' : '';
-      $('card-note').textContent = ok ? 'せいかい! 🎉' : 'こたえは これ!';
+      $('card-note').innerHTML = (ok ? 'せいかい! 🎉' : 'こたえは これ!') + (c.note ? '<br>' + rubyfy(c.note) : '');
     }
     showNextButton();
   }, ok ? 'win' : 'lose', cap);
