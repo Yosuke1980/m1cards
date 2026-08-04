@@ -893,7 +893,6 @@ function sndKaboom(delay){ // どカーン!
   tone(t0, 90, 0.8, 'sine', 0.9, 28);
   playNoise(t0, 0.25, 250, 0.5);
   sndCrash(t0, 1.4, 0.3);
-  [220,277,330].forEach(f=>tone(t0, f, 0.3, 'sawtooth', 0.12));
 }
 function sndZuban(delay){ // ずばーん!(ざんねん)
   if(!sndOn) return;
@@ -916,11 +915,6 @@ function sndDon(delay){ // 太鼓ドン（低く重く）
   const t0 = actx().currentTime + (delay||0);
   tone(t0, 82, 0.55, 'sine', 0.7, 32);
   playNoise(t0, 0.12, 180, 0.25);
-}
-function sndFanfare(delay){ // れんぞく正解
-  if(!sndOn) return;
-  const t0 = actx().currentTime + (delay||0);
-  [523,659,784,1047].forEach((f,i)=>tone(t0+i*0.09, f, i===3?0.5:0.1, 'triangle', 0.16));
 }
 const sndBtn = $('snd-btn');
 function updSndBtn(){ sndBtn.textContent = sndOn ? '🔊' : '🔇'; }
@@ -1041,7 +1035,7 @@ function answerQuiz(btn, ok){
     if(ok){
       $('card').classList.add('flash');
       setTimeout(()=>$('card').classList.remove('flash'), 550);
-      if(qStreak>=3){ confetti(qStreak>=5 ? 26 : 14); sndFanfare(0); }
+      if(qStreak>=3){ confetti(qStreak>=5 ? 26 : 14); sndDon(0); }
     }else{
       $('card').classList.add('shake');
       setTimeout(()=>$('card').classList.remove('shake'), 500);
@@ -1052,7 +1046,6 @@ function answerQuiz(btn, ok){
       const n = c.votes.reduce((s,v)=>s+v.v,0);
       for(let i=0;i<n-1;i++) sndDon(0.4 + i*0.4 + 0.25);
       sndKaboom(0.4 + (n-1)*0.4 + 0.25);
-      sndFanfare(0.4 + (n-1)*0.4 + 0.8);
     }else{
       $('card').classList.add('answer');
       $('side-label').textContent = 'こたえ';
