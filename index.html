@@ -347,7 +347,7 @@ body.quiz-mode .filters button[data-f="審査員"]{display:none;}
   background:linear-gradient(180deg,#5c3a1e,#3a2412);
   border:2px solid #7a5327;border-radius:8px 8px 4px 4px;
   box-shadow:0 8px 20px rgba(0,0,0,.5);
-  animation:emiShake .35s ease;
+  animation:emiShake .35s ease 3;
 }
 .emi-box::before{
   content:"えみくじ";
@@ -363,7 +363,7 @@ body.quiz-mode .filters button[data-f="審査員"]{display:none;}
   position:absolute;bottom:62px;left:50%;
   width:48px;height:160px;margin-left:-24px;
   perspective:500px;
-  animation:emiRise .5s .3s cubic-bezier(.2,1.3,.5,1) both;
+  animation:emiRise .5s 1.05s cubic-bezier(.2,1.3,.5,1) both;
 }
 @keyframes emiRise{
   0%{transform:translateY(130px);opacity:0;}
@@ -373,7 +373,7 @@ body.quiz-mode .filters button[data-f="審査員"]{display:none;}
 .emi-inner{
   position:relative;display:block;width:100%;height:100%;
   transform-style:preserve-3d;
-  animation:emiFlip .45s .95s ease forwards;
+  animation:emiFlip .45s 1.6s ease forwards;
 }
 @keyframes emiFlip{to{transform:rotateY(180deg);}}
 .emi-face{
@@ -902,12 +902,15 @@ function sndZuban(delay){ // ずばーん!(ざんねん)
   tone(t0+0.05, 70, 0.6, 'sine', 0.6, 30);
   sndCrash(t0, 0.8, 0.18);
 }
-function sndRoll(dur){ // 結果発表ドラムロール
+function sndShake(){ // くじ箱を振る「ジャッ…ジャッ…」（箱の揺れと同期）
   if(!sndOn) return;
   const t0 = actx().currentTime;
-  for(let t=0; t<dur; t+=0.045){
-    playNoise(t0+t, 0.04, 1800, 0.05);
-    tone(t0+t, 170, 0.03, 'triangle', 0.04);
+  for(let i=0;i<3;i++){
+    const t = t0 + i*0.35;
+    playNoise(t+0.09, 0.07, 2400, 0.3);
+    tone(t+0.09, 180, 0.05, 'triangle', 0.09);
+    playNoise(t+0.26, 0.09, 1900, 0.36);
+    tone(t+0.26, 150, 0.06, 'triangle', 0.11);
   }
 }
 function sndDon(delay){ // 太鼓ドン（低く重く）
@@ -1027,9 +1030,9 @@ function answerQuiz(btn, ok){
   if(ok){ qScore++; qStreak++; }
   else{ qStreak = 0; btn.classList.add('wrong'); }
   quizStatus();
-  sndRoll(1.25);
-  if(ok){ sndKaboom(1.35); }
-  else { sndZuban(1.35); }
+  sndShake();
+  if(ok){ sndKaboom(2.0); }
+  else { sndZuban(2.0); }
   const cap = ok && qStreak>=2 ? '🔥'+qStreak+'れんぞく!' : '';
   emikuji(ok ? 'せいかい' : 'ざんねん…', ()=>{
     if(ok){
@@ -1123,12 +1126,12 @@ function emikuji(label, done, tone, caption){
     (caption ? '<div class="emi-caption">'+caption+'</div>' : '')+
     '</div>';
   document.body.appendChild(o);
-  setTimeout(()=>{ o.remove(); if(done) done(); }, 2400);
+  setTimeout(()=>{ o.remove(); if(done) done(); }, 3100);
 }
 
 function emikujiDraw(){
   if(document.querySelector('.emikuji-overlay')) return;
-  sndRoll(1.25); sndKaboom(1.35);
+  sndShake(); sndKaboom(2.0);
   const target = Math.floor(Math.random()*pool.length);
   const c = cards[pool[target]];
   emikuji(catLabels[c.c] || c.c, ()=>{
