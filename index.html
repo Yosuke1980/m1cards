@@ -839,13 +839,27 @@ function noiseBuf(){
   return noiseBuf.b = b;
 }
 let masterNode = null;
+function makeIR(dur, decay){ // ホール残響のインパルス応答を合成
+  const c = actx(), len = Math.floor(c.sampleRate*dur);
+  const b = c.createBuffer(2, len, c.sampleRate);
+  for(let ch=0; ch<2; ch++){
+    const d = b.getChannelData(ch);
+    for(let i=0; i<len; i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/len, decay);
+  }
+  return b;
+}
 function master(){
   const c = actx();
   if(!masterNode){
+    const inp = c.createGain();
     const comp = c.createDynamicsCompressor();
     comp.threshold.value = -14; comp.knee.value = 20; comp.ratio.value = 6;
     comp.connect(c.destination);
-    masterNode = comp;
+    inp.connect(comp); // ドライ
+    const conv = c.createConvolver(); conv.buffer = makeIR(1.8, 2.5);
+    const wet = c.createGain(); wet.gain.value = 0.35;
+    inp.connect(conv); conv.connect(wet); wet.connect(comp); // リバーブ
+    masterNode = inp;
   }
   return masterNode;
 }
