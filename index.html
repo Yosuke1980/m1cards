@@ -911,25 +911,11 @@ function sndRoll(dur){ // 結果発表ドラムロール
     tone(t0+t, 170, 0.03, 'triangle', 0.04);
   }
 }
-function sndDon(delay){ // 太鼓ドン
+function sndDon(delay){ // 太鼓ドン（低く重く）
   if(!sndOn) return;
   const t0 = actx().currentTime + (delay||0);
-  tone(t0, 130, 0.35, 'sine', 0.55, 50);
-  playNoise(t0, 0.15, 300, 0.3);
-}
-function sndPinpon(delay){ // せいかい
-  if(!sndOn) return;
-  const t0 = actx().currentTime + (delay||0);
-  [0, 0.28].forEach(off=>{
-    tone(t0+off, 1319, 0.12, 'sine', 0.2);
-    tone(t0+off+0.12, 1047, 0.22, 'sine', 0.2);
-  });
-}
-function sndBubu(delay){ // ざんねん
-  if(!sndOn) return;
-  const t0 = actx().currentTime + (delay||0);
-  tone(t0, 110, 0.15, 'square', 0.11);
-  tone(t0+0.2, 110, 0.4, 'square', 0.11);
+  tone(t0, 82, 0.55, 'sine', 0.7, 32);
+  playNoise(t0, 0.12, 180, 0.25);
 }
 function sndFanfare(delay){ // れんぞく正解
   if(!sndOn) return;
@@ -941,7 +927,7 @@ function updSndBtn(){ sndBtn.textContent = sndOn ? '🔊' : '🔇'; }
 sndBtn.addEventListener('click', ()=>{
   sndOn = !sndOn;
   try{ localStorage.setItem('m1-sound', sndOn ? 'on' : 'off'); }catch(e){}
-  if(sndOn){ actx(); sndPinpon(0); }
+  if(sndOn){ actx(); sndDon(0); }
   updSndBtn();
 });
 updSndBtn();
@@ -1048,8 +1034,8 @@ function answerQuiz(btn, ok){
   else{ qStreak = 0; btn.classList.add('wrong'); }
   quizStatus();
   sndRoll(1.25);
-  if(ok){ sndKaboom(1.35); sndPinpon(1.6); }
-  else { sndZuban(1.35); sndBubu(1.85); }
+  if(ok){ sndKaboom(1.35); }
+  else { sndZuban(1.35); }
   const cap = ok && qStreak>=2 ? '🔥'+qStreak+'れんぞく!' : '';
   emikuji(ok ? 'せいかい' : 'ざんねん…', ()=>{
     if(ok){
