@@ -838,12 +838,23 @@ function noiseBuf(){
   for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
   return noiseBuf.b = b;
 }
+let masterNode = null;
+function master(){
+  const c = actx();
+  if(!masterNode){
+    const comp = c.createDynamicsCompressor();
+    comp.threshold.value = -14; comp.knee.value = 20; comp.ratio.value = 6;
+    comp.connect(c.destination);
+    masterNode = comp;
+  }
+  return masterNode;
+}
 function playNoise(t0, dur, freq, peak){
   const c = actx();
   const s = c.createBufferSource(); s.buffer = noiseBuf(); s.loop = true;
   const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = freq;
   const g = c.createGain(); envGain(g, t0, peak, dur);
-  s.connect(f); f.connect(g); g.connect(c.destination);
+  s.connect(f); f.connect(g); g.connect(master());
   s.start(t0); s.stop(t0+dur+0.05);
 }
 function tone(t0, freq, dur, type, peak, slideTo){
@@ -851,8 +862,32 @@ function tone(t0, freq, dur, type, peak, slideTo){
   const o = c.createOscillator(); o.type = type; o.frequency.setValueAtTime(freq, t0);
   if(slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t0+dur);
   const g = c.createGain(); envGain(g, t0, peak, dur);
-  o.connect(g); g.connect(c.destination);
+  o.connect(g); g.connect(master());
   o.start(t0); o.stop(t0+dur+0.05);
+}
+function sndCrash(t0, dur, peak){ // シンバル「シャーン」の余韻
+  const c = actx();
+  const s = c.createBufferSource(); s.buffer = noiseBuf(); s.loop = true;
+  const f = c.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 5000;
+  const g = c.createGain(); envGain(g, t0, peak, dur);
+  s.connect(f); f.connect(g); g.connect(master());
+  s.start(t0); s.stop(t0+dur+0.05);
+}
+function sndKaboom(delay){ // どカーン!
+  if(!sndOn) return;
+  const t0 = actx().currentTime + (delay||0);
+  tone(t0, 90, 0.8, 'sine', 0.9, 28);
+  playNoise(t0, 0.25, 250, 0.5);
+  sndCrash(t0, 1.4, 0.3);
+  [220,277,330].forEach(f=>tone(t0, f, 0.3, 'sawtooth', 0.12));
+}
+function sndZuban(delay){ // ずばーん!(ざんねん)
+  if(!sndOn) return;
+  const t0 = actx().currentTime + (delay||0);
+  tone(t0, 500, 0.45, 'sawtooth', 0.3, 60);
+  playNoise(t0, 0.2, 400, 0.4);
+  tone(t0+0.05, 70, 0.6, 'sine', 0.6, 30);
+  sndCrash(t0, 0.8, 0.18);
 }
 function sndRoll(dur){ // 結果発表ドラムロール
   if(!sndOn) return;
@@ -865,8 +900,8 @@ function sndRoll(dur){ // 結果発表ドラムロール
 function sndDon(delay){ // 太鼓ドン
   if(!sndOn) return;
   const t0 = actx().currentTime + (delay||0);
-  tone(t0, 130, 0.35, 'sine', 0.45, 55);
-  playNoise(t0, 0.12, 300, 0.2);
+  tone(t0, 130, 0.35, 'sine', 0.55, 50);
+  playNoise(t0, 0.15, 300, 0.3);
 }
 function sndPinpon(delay){ // せいかい
   if(!sndOn) return;
@@ -999,7 +1034,8 @@ function answerQuiz(btn, ok){
   else{ qStreak = 0; btn.classList.add('wrong'); }
   quizStatus();
   sndRoll(1.25);
-  if(ok){ sndPinpon(1.35); } else { sndBubu(1.35); }
+  if(ok){ sndKaboom(1.35); sndPinpon(1.6); }
+  else { sndZuban(1.35); sndBubu(1.85); }
   const cap = ok && qStreak>=2 ? '🔥'+qStreak+'れんぞく!' : '';
   emikuji(ok ? 'せいかい' : 'ざんねん…', ()=>{
     if(ok){
@@ -1014,8 +1050,9 @@ function answerQuiz(btn, ok){
       $('card-text').innerHTML = voteRevealHTML(c.votes);
       $('card-note').textContent = 'とうひょうオープン!';
       const n = c.votes.reduce((s,v)=>s+v.v,0);
-      for(let i=0;i<n;i++) sndDon(0.4 + i*0.4 + 0.25);
-      sndFanfare(0.4 + (n-1)*0.4 + 0.7);
+      for(let i=0;i<n-1;i++) sndDon(0.4 + i*0.4 + 0.25);
+      sndKaboom(0.4 + (n-1)*0.4 + 0.25);
+      sndFanfare(0.4 + (n-1)*0.4 + 0.8);
     }else{
       $('card').classList.add('answer');
       $('side-label').textContent = 'こたえ';
@@ -1098,7 +1135,7 @@ function emikuji(label, done, tone, caption){
 
 function emikujiDraw(){
   if(document.querySelector('.emikuji-overlay')) return;
-  sndRoll(1.25); sndDon(1.35);
+  sndRoll(1.25); sndKaboom(1.35);
   const target = Math.floor(Math.random()*pool.length);
   const c = cards[pool[target]];
   emikuji(catLabels[c.c] || c.c, ()=>{
