@@ -140,6 +140,16 @@ h1 small{display:block;font-size:13px;font-weight:400;color:var(--text-dim);marg
   letter-spacing:0.05em;
   line-height:1.8;
 }
+.status .snd{
+  font-family:inherit;
+  font-size:14px;
+  padding:4px 9px;
+  margin-right:6px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:4px;
+  cursor:pointer;
+}
 .card{
   width:100%;
   max-width:740px;
@@ -518,7 +528,10 @@ body.quiz-mode .filters button[data-f="審査員"]{display:none;}
 <div class="status">
   <span id="counter"></span>
   <span class="learned-count" id="learned-count"></span>
-  <span class="badge" id="cat"></span>
+  <span>
+    <button id="snd-btn" class="snd" aria-label="おとのオンオフ">🔊</button>
+    <span class="badge" id="cat"></span>
+  </span>
 </div>
 
 <div class="card" id="card" tabindex="0" role="button" aria-label="カードをめくる">
@@ -803,6 +816,87 @@ function renderCard(){
   $('progress').style.width = ((idx+1)/pool.length*100) + '%';
 }
 
+// ---- サウンド（Web Audio自作効果音。外部音源なし） ----
+let sndOn = true;
+try{ sndOn = localStorage.getItem('m1-sound') !== 'off'; }catch(e){}
+let ac = null;
+function actx(){
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if(!ac) ac = new AC();
+  if(ac.state === 'suspended') ac.resume();
+  return ac;
+}
+function envGain(g, t0, peak, dur){
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.linearRampToValueAtTime(peak, t0+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+}
+function noiseBuf(){
+  if(noiseBuf.b) return noiseBuf.b;
+  const c = actx(), b = c.createBuffer(1, c.sampleRate*0.5, c.sampleRate);
+  const d = b.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+  return noiseBuf.b = b;
+}
+function playNoise(t0, dur, freq, peak){
+  const c = actx();
+  const s = c.createBufferSource(); s.buffer = noiseBuf(); s.loop = true;
+  const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = freq;
+  const g = c.createGain(); envGain(g, t0, peak, dur);
+  s.connect(f); f.connect(g); g.connect(c.destination);
+  s.start(t0); s.stop(t0+dur+0.05);
+}
+function tone(t0, freq, dur, type, peak, slideTo){
+  const c = actx();
+  const o = c.createOscillator(); o.type = type; o.frequency.setValueAtTime(freq, t0);
+  if(slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t0+dur);
+  const g = c.createGain(); envGain(g, t0, peak, dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0+dur+0.05);
+}
+function sndRoll(dur){ // 結果発表ドラムロール
+  if(!sndOn) return;
+  const t0 = actx().currentTime;
+  for(let t=0; t<dur; t+=0.045){
+    playNoise(t0+t, 0.04, 1800, 0.05);
+    tone(t0+t, 170, 0.03, 'triangle', 0.04);
+  }
+}
+function sndDon(delay){ // 太鼓ドン
+  if(!sndOn) return;
+  const t0 = actx().currentTime + (delay||0);
+  tone(t0, 130, 0.35, 'sine', 0.45, 55);
+  playNoise(t0, 0.12, 300, 0.2);
+}
+function sndPinpon(delay){ // せいかい
+  if(!sndOn) return;
+  const t0 = actx().currentTime + (delay||0);
+  [0, 0.28].forEach(off=>{
+    tone(t0+off, 1319, 0.12, 'sine', 0.2);
+    tone(t0+off+0.12, 1047, 0.22, 'sine', 0.2);
+  });
+}
+function sndBubu(delay){ // ざんねん
+  if(!sndOn) return;
+  const t0 = actx().currentTime + (delay||0);
+  tone(t0, 110, 0.15, 'square', 0.11);
+  tone(t0+0.2, 110, 0.4, 'square', 0.11);
+}
+function sndFanfare(delay){ // れんぞく正解
+  if(!sndOn) return;
+  const t0 = actx().currentTime + (delay||0);
+  [523,659,784,1047].forEach((f,i)=>tone(t0+i*0.09, f, i===3?0.5:0.1, 'triangle', 0.16));
+}
+const sndBtn = $('snd-btn');
+function updSndBtn(){ sndBtn.textContent = sndOn ? '🔊' : '🔇'; }
+sndBtn.addEventListener('click', ()=>{
+  sndOn = !sndOn;
+  try{ localStorage.setItem('m1-sound', sndOn ? 'on' : 'off'); }catch(e){}
+  if(sndOn){ actx(); sndPinpon(0); }
+  updSndBtn();
+});
+updSndBtn();
+
 let mode = 'card';
 let quizLock = false, quizAwaitNext = false;
 let qScore = 0, qTotal = 0, qStreak = 0;
@@ -904,12 +998,14 @@ function answerQuiz(btn, ok){
   if(ok){ qScore++; qStreak++; }
   else{ qStreak = 0; btn.classList.add('wrong'); }
   quizStatus();
+  sndRoll(1.25);
+  if(ok){ sndPinpon(1.35); } else { sndBubu(1.35); }
   const cap = ok && qStreak>=2 ? '🔥'+qStreak+'れんぞく!' : '';
   emikuji(ok ? 'せいかい' : 'ざんねん…', ()=>{
     if(ok){
       $('card').classList.add('flash');
       setTimeout(()=>$('card').classList.remove('flash'), 550);
-      if(qStreak>=3) confetti(qStreak>=5 ? 26 : 14);
+      if(qStreak>=3){ confetti(qStreak>=5 ? 26 : 14); sndFanfare(0); }
     }else{
       $('card').classList.add('shake');
       setTimeout(()=>$('card').classList.remove('shake'), 500);
@@ -917,6 +1013,9 @@ function answerQuiz(btn, ok){
     if(c.votes){
       $('card-text').innerHTML = voteRevealHTML(c.votes);
       $('card-note').textContent = 'とうひょうオープン!';
+      const n = c.votes.reduce((s,v)=>s+v.v,0);
+      for(let i=0;i<n;i++) sndDon(0.4 + i*0.4 + 0.25);
+      sndFanfare(0.4 + (n-1)*0.4 + 0.7);
     }else{
       $('card').classList.add('answer');
       $('side-label').textContent = 'こたえ';
@@ -999,6 +1098,7 @@ function emikuji(label, done, tone, caption){
 
 function emikujiDraw(){
   if(document.querySelector('.emikuji-overlay')) return;
+  sndRoll(1.25); sndDon(1.35);
   const target = Math.floor(Math.random()*pool.length);
   const c = cards[pool[target]];
   emikuji(catLabels[c.c] || c.c, ()=>{
