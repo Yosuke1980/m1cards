@@ -291,6 +291,12 @@ body.quiz-mode .filters button[data-f="審査員"]{display:none;}
 }
 @media (hover:hover){.choices button.next-q:hover:not(:disabled){background:#e2483d;border-color:#e2483d;}}
 .choices button.wrong{background:var(--red-deep);border-color:var(--red-deep);color:#fff;}
+.choices button.giveup{
+  grid-column:1/-1;
+  background:transparent;border:1px dashed #55505c;color:#8f8a96;
+  font-size:13px;padding:9px 12px;
+}
+@media (hover:hover){.choices button.giveup:hover:not(:disabled){border-color:#8f8a96;color:#c9c4d0;}}
 .choices button:disabled{cursor:default;}
 .confetti{
   position:fixed;top:-16px;z-index:30;
@@ -1054,9 +1060,14 @@ function buildChoices(c){
     b.addEventListener('click', ()=>answerQuiz(b, a===c.a));
     el.appendChild(b);
   });
+  const g = document.createElement('button');
+  g.className = 'giveup';
+  g.textContent = '🏳️ ギブアップ';
+  g.addEventListener('click', ()=>answerQuiz(null, false, true));
+  el.appendChild(g);
 }
 
-function answerQuiz(btn, ok){
+function answerQuiz(btn, ok, gaveUp){
   if(quizLock) return;
   quizLock = true; qTotal++;
   const c = cards[pool[idx]];
@@ -1065,13 +1076,14 @@ function answerQuiz(btn, ok){
     if(b.dataset.a===c.a) b.classList.add('correct');
   });
   if(ok){ qScore++; qStreak++; }
-  else{ qStreak = 0; btn.classList.add('wrong'); }
+  else{ qStreak = 0; if(btn) btn.classList.add('wrong'); }
   quizStatus();
   sndShake();
   if(ok){ sndKaboom(2.0); }
+  else if(gaveUp){ sndDon(2.0); }
   else { sndZuban(2.0); }
   const cap = ok && qStreak>=2 ? '🔥'+qStreak+'れんぞく!' : '';
-  emikuji(ok ? 'せいかい' : 'ざんねん…', ()=>{
+  emikuji(ok ? 'せいかい' : (gaveUp ? 'こたえは…' : 'ざんねん…'), ()=>{
     if(ok){
       $('card').classList.add('flash');
       setTimeout(()=>$('card').classList.remove('flash'), 550);
