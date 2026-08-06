@@ -508,8 +508,8 @@ body.quiz-mode .filters button[data-f="審査員"]{display:none;}
 </header>
 
 <div class="mode-toggle" id="mode-toggle">
-  <button data-m="card" class="active">カードでおぼえる</button>
-  <button data-m="quiz">4たくクイズ 🔥</button>
+  <button data-m="card">カードでおぼえる</button>
+  <button data-m="quiz" class="active">4たくクイズ 🔥</button>
 </div>
 
 <div class="filters" id="filters">
@@ -954,7 +954,8 @@ sndBtn.addEventListener('click', ()=>{
 });
 updSndBtn();
 
-let mode = 'card';
+let mode = 'quiz';
+document.body.classList.add('quiz-mode');
 let quizLock = false, quizAwaitNext = false;
 let qScore = 0, qTotal = 0, qStreak = 0;
 
