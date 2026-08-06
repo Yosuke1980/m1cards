@@ -742,7 +742,12 @@ years.forEach(d=>{
       const m = s && s.match(/\((\d+)票/);
       if(m) votes.push({n:s.replace(/\(.*$/,''), w:false, v:+m[1]});
     });
-    cards.push({c:"出番・票", q:`${d.y}年[ねん]の最終決戦[さいしゅうけっせん]、${d.win}は何票[なんびょう]?`, a:d.hyo, votes});
+    const nj = judges[d.y] ? judges[d.y].split("\n").length : 7;
+    const v = parseInt(d.hyo);
+    const hyoOpts = [];
+    for(let k=0;k<=nj;k++) if(k!==v) hyoOpts.push(k+'/'+nj);
+    for(let i=hyoOpts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [hyoOpts[i],hyoOpts[j]]=[hyoOpts[j],hyoOpts[i]]; }
+    cards.push({c:"出番・票", q:`${d.y}年[ねん]の最終決戦[さいしゅうけっせん]、${d.win}は審査員[しんさいん]${nj}人[にん]のうち何票[なんびょう]?`, a:`${v}/${nj}`, alt:hyoOpts.slice(0,3), votes});
   }
   if(judges[d.y]){
     const n = judges[d.y].split("\n").length;
