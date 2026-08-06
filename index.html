@@ -1076,19 +1076,20 @@ function answerQuiz(btn, ok, gaveUp){
   if(quizLock) return;
   quizLock = true; qTotal++;
   const c = cards[pool[idx]];
-  [...$('choices').children].forEach(b=>{
-    b.disabled = true;
-    if(b.dataset.a===c.a) b.classList.add('correct');
-  });
+  [...$('choices').children].forEach(b=>{ b.disabled = true; });
   if(ok){ qScore++; qStreak++; }
-  else{ qStreak = 0; if(btn) btn.classList.add('wrong'); }
-  quizStatus();
+  else{ qStreak = 0; }
   sndShake();
   if(ok){ sndKaboom(2.0); }
   else if(gaveUp){ sndDon(2.0); }
   else { sndZuban(2.0); }
   const cap = ok && qStreak>=2 ? '🔥'+qStreak+'れんぞく!' : '';
   emikuji(ok ? 'せいかい' : (gaveUp ? 'こたえは…' : 'ざんねん…'), ()=>{
+    [...$('choices').children].forEach(b=>{
+      if(b.dataset.a===c.a) b.classList.add('correct');
+    });
+    if(!ok && btn) btn.classList.add('wrong');
+    quizStatus();
     if(ok){
       $('card').classList.add('flash');
       setTimeout(()=>$('card').classList.remove('flash'), 550);
