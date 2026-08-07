@@ -422,6 +422,73 @@ body.quiz-mode .card{min-height:200px;cursor:default;}
   60%{transform:translateX(-5px);}
   80%{transform:translateX(5px);}
 }
+.uta,.zukan{display:none;width:100%;max-width:740px;}
+body.uta-mode .uta{display:block;}
+body.zukan-mode .zukan{display:block;}
+body.uta-mode .card,body.uta-mode .choices,body.uta-mode .controls,body.uta-mode .status,body.uta-mode .filters,body.uta-mode .progress-bar,body.uta-mode .help,
+body.zukan-mode .card,body.zukan-mode .choices,body.zukan-mode .controls,body.zukan-mode .status,body.zukan-mode .filters,body.zukan-mode .progress-bar,body.zukan-mode .help{display:none;}
+.uta-panel{
+  background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--red);
+  border-radius:12px;padding:22px 18px 30px;
+  box-shadow:0 0 0 1px rgba(217,164,65,.28), 0 14px 44px rgba(0,0,0,.5);
+}
+.uta-title{font-size:18px;font-weight:900;color:var(--gold);margin-bottom:4px;text-align:center;letter-spacing:.1em;}
+.uta-sub{font-size:12px;color:var(--text-dim);text-align:center;margin-bottom:14px;line-height:1.8;}
+.uta-play{
+  display:block;margin:0 auto 16px;font-family:inherit;font-size:15px;font-weight:700;
+  padding:12px 28px;border-radius:999px;border:1px solid var(--gold);
+  background:transparent;color:var(--gold);cursor:pointer;transition:all .15s;
+}
+.uta-play.playing{background:var(--red);border-color:var(--red);color:#fff;}
+@media (hover:hover){.uta-play:hover{background:var(--gold);color:#1a1408;}}
+.uta-line{
+  display:flex;align-items:baseline;gap:12px;
+  padding:9px 14px;border-radius:8px;cursor:pointer;
+  font-size:19px;font-weight:700;line-height:1.9;transition:background .15s;
+}
+@media (hover:hover){.uta-line:hover{background:var(--panel-2);}}
+.uta-line .u-y{flex:0 0 92px;color:var(--red);font-weight:900;text-align:right;font-size:17px;}
+.uta-line.now{background:linear-gradient(90deg,rgba(217,164,65,.25),transparent);}
+.uta-line.now .u-y{color:var(--gold);}
+.uta-head{
+  font-size:13px;font-weight:700;color:var(--text-dim);letter-spacing:.15em;
+  margin:14px 0 4px;padding:0 14px;cursor:default;
+}
+.zk-intro{
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:16px;margin-bottom:12px;font-size:13px;color:var(--text-dim);line-height:2;
+}
+.zk-intro strong{color:var(--gold);}
+details.zk-year{
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  margin-bottom:8px;overflow:hidden;
+}
+details.zk-year summary{
+  list-style:none;cursor:pointer;padding:13px 16px;
+  font-size:16px;font-weight:700;line-height:1.9;
+  display:flex;align-items:baseline;gap:10px;
+}
+details.zk-year summary::-webkit-details-marker{display:none;}
+details.zk-year summary .zk-y{flex:0 0 auto;color:var(--red);font-weight:900;}
+details.zk-year summary .zk-k{flex:0 0 auto;font-size:12px;color:var(--text-dim);}
+details.zk-year[open]{border-color:var(--gold);}
+details.zk-year[open] summary{border-bottom:1px solid var(--line);background:var(--panel-2);}
+.zk-body{padding:13px 16px 15px;font-size:14px;line-height:2.1;}
+.zk-body .zk-row{margin-bottom:4px;}
+.zk-body .zk-label{
+  display:inline-block;font-size:11px;font-weight:700;color:var(--gold);
+  border:1px solid rgba(217,164,65,.5);border-radius:4px;padding:0 7px;margin-right:8px;
+  vertical-align:1px;letter-spacing:.05em;
+}
+.zk-judges{font-size:13px;color:var(--text-dim);line-height:2;}
+@media (max-width:560px){
+  .mode-toggle button{padding:9px 4px;font-size:12px;}
+  body.uta-mode,body.zukan-mode{padding-bottom:32px;}
+  .uta-line{font-size:16px;padding:8px 10px;gap:8px;}
+  .uta-line .u-y{flex:0 0 76px;font-size:14px;}
+  details.zk-year summary{font-size:14px;padding:11px 12px;}
+  .zk-body{font-size:13px;}
+}
 .progress-bar{
   width:100%;
   max-width:740px;
@@ -513,8 +580,10 @@ body.quiz-mode .card{min-height:200px;cursor:default;}
 </header>
 
 <div class="mode-toggle" id="mode-toggle">
-  <button data-m="card">カードでおぼえる</button>
-  <button data-m="quiz" class="active">4たくクイズ 🔥</button>
+  <button data-m="card">カード</button>
+  <button data-m="quiz" class="active">クイズ 🔥</button>
+  <button data-m="uta">うた 🎵</button>
+  <button data-m="zukan">ずかん 📖</button>
 </div>
 
 <div class="filters" id="filters">
@@ -548,6 +617,9 @@ body.quiz-mode .card{min-height:200px;cursor:default;}
 </div>
 
 <div class="choices" id="choices"></div>
+
+<div class="uta" id="uta"></div>
+<div class="zukan" id="zukan"></div>
 
 <div class="controls">
   <button onclick="prev()">← まえへ</button>
@@ -1029,7 +1101,10 @@ document.querySelectorAll('.mode-toggle button').forEach(b=>{
     document.querySelectorAll('.mode-toggle button').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
     document.body.classList.toggle('quiz-mode', mode==='quiz');
-    buildPool(); render();
+    document.body.classList.toggle('uta-mode', mode==='uta');
+    document.body.classList.toggle('zukan-mode', mode==='zukan');
+    utaStop();
+    if(mode==='card'||mode==='quiz'){ buildPool(); render(); }
   });
 });
 
@@ -1262,9 +1337,9 @@ function emikujiDraw(){
   });
 }
 
-function flip(){ if(mode==='quiz'){ nextQuiz(); return; } showAnswer = !showAnswer; render(); }
-function next(){ if(mode==='quiz'&&quizLock) return; idx = (idx+1) % pool.length; showAnswer = false; render(); }
-function prev(){ if(mode==='quiz'&&quizLock) return; idx = (idx-1+pool.length) % pool.length; showAnswer = false; render(); }
+function flip(){ if(mode==='uta'||mode==='zukan') return; if(mode==='quiz'){ nextQuiz(); return; } showAnswer = !showAnswer; render(); }
+function next(){ if(mode==='uta'||mode==='zukan') return; if(mode==='quiz'&&quizLock) return; idx = (idx+1) % pool.length; showAnswer = false; render(); }
+function prev(){ if(mode==='uta'||mode==='zukan') return; if(mode==='quiz'&&quizLock) return; idx = (idx-1+pool.length) % pool.length; showAnswer = false; render(); }
 function toggleLearned(){
   const ci = pool[idx];
   if(learned.has(ci)){ learned.delete(ci); }
@@ -1310,6 +1385,118 @@ document.addEventListener('keydown', e=>{
   else if(e.key==='h' || e.key==='H'){ toggleHard(); }
   else if(e.key==='s' || e.key==='S'){ shuffleCards(); }
 });
+
+// ---- おぼえうた（優勝者かぞえうた・チャンツ調） ----
+const winByYear = {};
+years.forEach(d=>{ winByYear[d.y] = d.win; });
+const utaData = [
+  {h:'✊ リズムにのって「年[とし]よみ → コンビ名[めい]!」'},
+  {h:'── まえはん 2001〜2010 ──'},
+  {y:2001, r:'ゼロイチ'},
+  {y:2002, r:'ゼロニ'},
+  {y:2003, r:'ゼロサン'},
+  {y:2004, r:'ゼロヨン'},
+  {y:2005, r:'ゼロゴー'},
+  {y:2006, r:'ゼロロク'},
+  {y:2007, r:'ゼロナナ'},
+  {y:2008, r:'ゼロハチ'},
+  {y:2009, r:'ゼロキュー'},
+  {y:2010, r:'イチゼロ'},
+  {h:'🌙 2011〜2014は 4年[ねん]おやすみ…'},
+  {h:'── こうはん 2015〜2025 ──'},
+  {y:2015, r:'イチゴー'},
+  {y:2016, r:'イチロク'},
+  {y:2017, r:'イチナナ'},
+  {y:2018, r:'イチハチ'},
+  {y:2019, r:'イチキュー'},
+  {y:2020, r:'ニーゼロ'},
+  {y:2021, r:'ニーイチ'},
+  {y:2022, r:'ニーニー'},
+  {y:2023, r:'ニーサン'},
+  {y:2024, r:'ニーヨン', pre:'またまた! '},
+  {y:2025, r:'ニーゴー'}
+];
+(function buildUta(){
+  let h = '<div class="uta-panel">'+
+    '<p class="uta-title">🎵 '+rubyfy('優勝者[ゆうしょうしゃ]かぞえうた')+'</p>'+
+    '<p class="uta-sub">'+rubyfy('タップで1行[ぎょう]ずつ・▶で頭[あたま]から。太鼓[たいこ]にあわせて声[こえ]に出[だ]すとおぼえられる!')+'</p>'+
+    '<button class="uta-play" id="uta-play">▶ うたスタート</button>';
+  utaData.forEach(u=>{
+    if(u.h){ h += '<p class="uta-head">'+rubyfy(u.h)+'</p>'; return; }
+    h += '<div class="uta-line" data-y="'+u.y+'">'+
+      '<span class="u-y">'+u.r+'</span>'+
+      '<span>'+(u.pre||'')+rubyfy(winByYear[u.y])+
+      ' <small style="color:var(--text-dim);font-size:12px;font-weight:400;">'+u.y+'</small></span>'+
+      '</div>';
+  });
+  h += '</div>';
+  $('uta').innerHTML = h;
+  document.querySelectorAll('.uta-line').forEach(l=>{
+    l.addEventListener('click', ()=>{
+      if(utaTimer) return;
+      l.classList.add('now'); sndDon(0);
+      setTimeout(()=>l.classList.remove('now'), 650);
+    });
+  });
+  $('uta-play').addEventListener('click', ()=>{ utaTimer ? utaStop() : utaPlay(); });
+})();
+
+let utaTimer = null;
+function utaStop(){
+  if(utaTimer){ clearInterval(utaTimer); utaTimer = null; }
+  const btn = $('uta-play');
+  if(btn){ btn.textContent = '▶ うたスタート'; btn.classList.remove('playing'); }
+  document.querySelectorAll('.uta-line.now').forEach(l=>l.classList.remove('now'));
+}
+function utaPlay(){
+  const els = [...document.querySelectorAll('#uta .uta-line, #uta .uta-head')].filter(e=>!e.textContent.startsWith('✊'));
+  let i = 0;
+  actx();
+  const btn = $('uta-play');
+  btn.textContent = '⏸ とめる'; btn.classList.add('playing');
+  const step = ()=>{
+    document.querySelectorAll('.uta-line.now').forEach(l=>l.classList.remove('now'));
+    if(i >= els.length){ utaStop(); sndKaboom(0); confetti(14); return; }
+    const el = els[i];
+    if(el.classList.contains('uta-line')){ el.classList.add('now'); sndDon(0); }
+    el.scrollIntoView({block:'center', behavior:'smooth'});
+    i++;
+  };
+  step();
+  utaTimer = setInterval(step, 1100);
+}
+
+// ---- ずかん（参考書ページ・全大会データ） ----
+(function buildZukan(){
+  let h = '<div class="zk-intro">'+
+    '<strong>📖 M-1まるわかりずかん</strong><br>'+
+    rubyfy('年[ねん]をタップすると くわしいデータがひらくよ<br>'+
+      '🗓 回[かい]⇔年[とし]のかんたん変換[へんかん]: 2010年[ねん]までは数字[すうじ]そのまま・2015年[ねん]からは「4」をたしひき(第[だい]21回[かい]=2025年[ねん])<br>'+
+      '🏆 <b>すごいきろく</b>: 全員票[ぜんいんひょう]=チュートリアル(2006)とパンクブーブー(2009) / 敗者復活[はいしゃふっかつ]優勝[ゆうしょう]=サンドウィッチマン(2007)とトレンディエンジェル(2015) / 2連覇[れんぱ]=令和[れいわ]ロマン / 最高得点[さいこうとくてん]=ミルクボーイ681点[てん](歴代[れきだい]1位[い]) /唯一[ゆいいつ]の100点[てん]=島田紳助[しまだしんすけ]→笑[わら]い飯[めし](2009) / 決勝[けっしょう]最多[さいた]=笑[わら]い飯[めし]9回[かい]連続[れんぞく]')+
+    '</div>';
+  years.forEach(d=>{
+    h += '<details class="zk-year"><summary>'+
+      '<span class="zk-y">'+d.y+'</span>'+
+      '<span class="zk-k">'+rubyfy('第[だい]'+d.kai+'回[かい]')+'</span>'+
+      '<span>👑 '+rubyfy(d.win)+'</span>'+
+      '</summary><div class="zk-body">';
+    h += '<div class="zk-row"><span class="zk-label">優勝</span>'+rubyfy(d.win)+
+      (d.ten ? '　'+rubyfy(d.ten) : '')+(d.ban ? '　'+rubyfy('出番[でばん]:')+rubyfy(d.ban) : '')+'</div>';
+    if(d.hyo){
+      h += '<div class="zk-row"><span class="zk-label">最終決戦</span>'+rubyfy(d.hyo)+
+        (d.ni ? '　'+rubyfy('2位[い]:')+rubyfy(d.ni) : '')+
+        (d.san ? '　'+rubyfy('3位[い]:')+rubyfy(d.san) : '')+'</div>';
+    }
+    if(judges[d.y]){
+      const list = judges[d.y].split("\n");
+      h += '<div class="zk-row"><span class="zk-label">審査員'+list.length+'人</span><span class="zk-judges">'+
+        list.map(rubyfy).join('・')+'</span></div>';
+    }
+    if(entries[d.y]) h += '<div class="zk-row"><span class="zk-label">エントリー</span>'+rubyfy(entries[d.y])+'</div>';
+    h += '</div></details>';
+  });
+  $('zukan').innerHTML = h;
+})();
 
 buildPool();
 render();
