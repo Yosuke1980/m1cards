@@ -262,7 +262,6 @@ body.quiz-mode .choices{display:grid;}
 body.quiz-mode .controls,
 body.quiz-mode .help{display:none;}
 body.quiz-mode .card{min-height:200px;cursor:default;}
-body.quiz-mode .filters button[data-f="審査員"]{display:none;}
 .choices button{
   font-family:inherit;
   font-size:15px;
@@ -751,13 +750,57 @@ years.forEach(d=>{
   }
   if(judges[d.y]){
     const n = judges[d.y].split("\n").length;
-    cards.push({c:"審査員", q:`${d.y}年[ねん]の審査員[しんさいん](${n}人[にん])は?`, a:judges[d.y]});
+    cards.push({c:"審査員", q:`${d.y}年[ねん]の審査員[しんさいん](${n}人[にん])は?`, a:judges[d.y], noQuiz:true});
   }
   cards.push({c:"回・年", q:`第[だい]${d.kai}回[かい]は何年[なんねん]?`, a:`${d.y}年[ねん]`, note:kaiToYearNote});
   cards.push({c:"回・年", q:`${d.y}年[ねん]は第何回[だいなんかい]?`, a:`第[だい]${d.kai}回[かい]`, note:yearToKaiNote});
   if(entries[d.y]) cards.push({c:"エントリー", q:`${d.y}年[ねん]のエントリーは何組[なんくみ]?`, a:entries[d.y]});
 });
 cards.push({c:"回・年", q:"2011〜2014年[ねん]のM-1[エムワン]は?", a:"おやすみ(なかった)\n(2010年[ねん]でいったんおわり、2015年[ねん]にふっかつ)", alt:["ふつうにやっていた","夏[なつ]にやっていた","ラジオだけでやっていた"]});
+
+// ---- 審査員4たくクイズ（いた? / じゃない? の2形式。こたえ発表[はっぴょう]でパネル全[ぜん]オープン） ----
+function normName(s){
+  return s.replace(/\[[^\]]*\]/g,'').replace(/[(（][^)）]*[)）]/g,'').trim();
+}
+const judgeIndex = {};
+Object.keys(judges).forEach(y=>{
+  judgeIndex[y] = judges[y].split("\n").map(f=>({full:f, key:normName(f)}));
+});
+const judgeByKey = {};
+Object.values(judgeIndex).forEach(list=>{
+  list.forEach(j=>{ if(!judgeByKey[j.key]) judgeByKey[j.key] = j.full; });
+});
+function pickRandom(arr, n){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a.slice(0, n);
+}
+years.forEach(d=>{
+  const list = judgeIndex[d.y];
+  if(!list) return;
+  const inKeys = new Set(list.map(j=>j.key));
+  const outsiders = Object.keys(judgeByKey).filter(k=>!inKeys.has(k));
+  if(outsiders.length < 3) return;
+  const panelNote = `💡 ${d.y}年[ねん]の審査員[しんさいん](${list.length}人[にん]): ` + list.map(j=>j.full).join('、');
+  const correct = list[Math.floor(Math.random()*list.length)];
+  cards.push({
+    c:"審査員",
+    q:`${d.y}年[ねん]の審査員[しんさいん]にいたのはだれ?`,
+    a:correct.full,
+    alt:pickRandom(outsiders, 3).map(k=>judgeByKey[k]),
+    panel:{y:d.y, list}, hl:correct.key,
+    note:panelNote
+  });
+  const outKey = pickRandom(outsiders, 1)[0];
+  cards.push({
+    c:"審査員",
+    q:`${d.y}年[ねん]の審査員[しんさいん]じゃないのはだれ?`,
+    a:judgeByKey[outKey],
+    alt:pickRandom(list, 3).map(j=>j.full),
+    panel:{y:d.y, list}, hl:null,
+    note:panelNote
+  });
+});
 kirokuCards.forEach(k=>cards.push({c:"きろく", q:k.q, a:k.a, alt:k.alt}));
 episodeCards.forEach(k=>cards.push({c:"エピソード", q:k.q, a:k.a, alt:k.alt}));
 
@@ -804,13 +847,13 @@ document.getElementById('total-label').textContent = 'ぜんぶで' + cards.leng
 
 function buildPool(){
   pool = cards.map((_,i)=>i).filter(i=>{
-    if(mode==='quiz' && cards[i].c==='審査員') return false;
+    if(mode==='quiz' && cards[i].noQuiz) return false;
     if(filter==='all') return true;
     if(filter==='unlearned') return !learned.has(i);
     if(filter==='hard') return hard.has(i);
     return cards[i].c===filter;
   });
-  if(pool.length===0) pool = cards.map((_,i)=>i).filter(i=>mode!=='quiz'||cards[i].c!=='審査員');
+  if(pool.length===0) pool = cards.map((_,i)=>i).filter(i=>mode!=='quiz'||!cards[i].noQuiz);
   for(let i=pool.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
     [pool[i],pool[j]]=[pool[j],pool[i]];
@@ -986,10 +1029,6 @@ document.querySelectorAll('.mode-toggle button').forEach(b=>{
     document.querySelectorAll('.mode-toggle button').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
     document.body.classList.toggle('quiz-mode', mode==='quiz');
-    if(mode==='quiz' && filter==='審査員'){
-      filter='all';
-      document.querySelectorAll('.filters button').forEach(x=>x.classList.toggle('active', x.dataset.f==='all'));
-    }
     buildPool(); render();
   });
 });
@@ -1103,7 +1142,14 @@ function answerQuiz(btn, ok, gaveUp){
       $('card').classList.add('shake');
       setTimeout(()=>$('card').classList.remove('shake'), 500);
     }
-    if(c.votes){
+    if(c.panel){
+      $('card-text').innerHTML = judgeRevealHTML(c);
+      $('card-text').style.fontSize = '';
+      $('card-note').innerHTML = '<ruby>審査員<rt>しんさいん</rt></ruby>オープン!';
+      const n = c.panel.list.length;
+      for(let i=0;i<n-1;i++) sndDon(0.35 + i*0.3 + 0.2);
+      sndKaboom(0.35 + (n-1)*0.3 + 0.2);
+    }else if(c.votes){
       $('card-text').innerHTML = voteRevealHTML(c.votes);
       $('card-note').textContent = 'とうひょうオープン!';
       const n = c.votes.reduce((s,v)=>s+v.v,0);
@@ -1170,6 +1216,23 @@ function voteRevealHTML(votes){
   });
   h += '</span><span class="votes-sum">'+
     votes.map(v=>(v.w?'👑':'')+rubyfy(v.n)+' '+v.v+'<ruby>票<rt>ひょう</rt></ruby>').join('　')+
+    '</span>';
+  return h;
+}
+
+function judgeRevealHTML(c){
+  const list = c.panel.list;
+  let h = '<span class="votes">';
+  list.forEach((j,i)=>{
+    h += '<span class="vote-panel'+(c.hl && j.key===c.hl ? ' win' : '')+'">'+
+         '<span class="vp-inner" style="animation-delay:'+(0.35+i*0.3)+'s">'+
+         '<span class="vp-front">?</span>'+
+         '<span class="vp-back">'+rubyfy(j.full)+'</span>'+
+         '</span></span>';
+  });
+  h += '</span><span class="votes-sum">'+
+    c.panel.y+'<ruby>年<rt>ねん</rt></ruby>の<ruby>審査員<rt>しんさいん</rt></ruby> '+list.length+'<ruby>人<rt>にん</rt></ruby>'+
+    (c.hl ? '' : '　✖ いなかったのは… <strong style="color:var(--gold);">'+rubyfy(c.a)+'</strong>')+
     '</span>';
   return h;
 }
