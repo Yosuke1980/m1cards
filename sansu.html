@@ -251,6 +251,7 @@ table.kuku td.diag{background:rgba(217,164,65,.22);color:var(--gold);font-weight
     <p class="rw-title">⭐ スタンプカード（れんぞくせいかいで たまる）</p>
     <div class="stamp-row" id="stamp-row"></div>
     <p class="rw-note">れんぞくで10もん せいかいすると メダル1こ！<br>まちがえると ⭐は0に もどるよ（メダルは へらない）</p>
+    <p class="rw-note" id="balance-note"></p>
   </div>
   <div class="rw-panel">
     <p class="rw-title">🏅 メダルだな</p>
@@ -490,9 +491,10 @@ function answer(btn, ok){
     // まちがいリストに入っていた問題に正解したら卒業
     const i = againPool.indexOf(k);
     if(i>=0){ againPool.splice(i,1); saveAgain(); }
-    const shown = GOHOUBI.award(()=>{ rwMini(); render(); }, 800);
+    const res = GOHOUBI.award(()=>{ rwMini(); render(); }, 800, 'sansu');
     rwMini();
-    if(!shown) setTimeout(render, 950);
+    if(res.capped) $('card-note').innerHTML = 'せいかい！でも この きょうかの ⭐は まんタン！<br>ほかの きょうかも やって あつめよう🎒';
+    if(!res.shown) setTimeout(render, 950);
   }else{
     streak = 0;
     GOHOUBI.miss(); rwMini();
@@ -544,6 +546,11 @@ function renderReward(){
   let sr = '';
   for(let i=0;i<10;i++) sr += '<div class="stamp'+(i<rw.s?' on':'')+'">'+(i<rw.s?'⭐':'')+'</div>';
   $('stamp-row').innerHTML = sr;
+  const names = {sansu:'さんすう', eigo:'えいご', kokugo:'こくご', joushiki:'じょうしき', hanashi:'おはなし', hakken:'はっけん', etc:'そのほか'};
+  const subj = rw.subj || {};
+  const parts = Object.keys(subj).map(k=>(names[k]||k)+' '+subj[k]+'こ');
+  const bal = document.getElementById('balance-note');
+  if(bal) bal.innerHTML = 'ひとつの きょうかで ためられるのは <b style="color:var(--gold);">4こまで</b>。いろんな きょうかを やろう！' + (parts.length ? '<br>いまのカード: ' + parts.join('・') : '');
   $('medal-shelf').textContent = rw.m ? '🏅'.repeat(Math.min(rw.m, 30)) : 'まだないよ。クイズで あつめよう！';
   const next = 3 - (rw.m % 3);
   $('medal-count').textContent = 'メダル ' + rw.m + ' こ' + (rw.m ? '（あと' + next + 'こで ごほうびけん！）' : '');

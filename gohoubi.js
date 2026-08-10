@@ -73,14 +73,21 @@
     save,
     mini(){ return '🏅' + rw.m + ' ⭐' + rw.s + '/10'; },
     // まちがえたらスタンプは0に戻る（れんぞくせいかい10もん＝メダルのルール。メダル・けんは減らない）
-    miss(){ if(rw.s > 0){ rw.s = 0; save(); } },
-    // スタンプ1こ加算。メダル/券が出たら演出を表示してtrueを返す（閉じたらonClose）。
-    // 演出なしならfalse（呼び出し側が自分のタイミングで次へ進む）。
-    award(onClose, delayMs){
+    miss(){ if(rw.s > 0 || (rw.subj && Object.keys(rw.subj).length)){ rw.s = 0; rw.subj = {}; save(); } },
+    // スタンプ1こ加算（教科バランス制: 1枚のカードにつき同一教科は4こまで）。
+    // 戻り値 {stamped, capped, shown}。shown=演出表示中（閉じたらonClose）。
+    SUBJECT_CAP: 4,
+    award(onClose, delayMs, subject){
+      subject = subject || 'etc';
+      if(!rw.subj) rw.subj = {};
+      if((rw.subj[subject] || 0) >= this.SUBJECT_CAP){
+        return {stamped:false, capped:true, shown:false};
+      }
+      rw.subj[subject] = (rw.subj[subject] || 0) + 1;
       rw.s++;
       let kind = null;
       if(rw.s >= 10){
-        rw.s = 0; rw.m++;
+        rw.s = 0; rw.m++; rw.subj = {};
         kind = 'medal';
         if(rw.m % 3 === 0){
           rw.t.push({id:Date.now(), u:false});
@@ -90,9 +97,9 @@
       save();
       if(kind){
         setTimeout(()=>overlay(kind, onClose), delayMs || 0);
-        return true;
+        return {stamped:true, capped:false, shown:true};
       }
-      return false;
+      return {stamped:true, capped:false, shown:false};
     }
   };
 })();

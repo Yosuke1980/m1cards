@@ -417,7 +417,7 @@ function toggleLearned(){
     if(!ghAwarded.has(ci)){
       ghAwarded.add(ci);
       try{ localStorage.setItem('hakken-gh-awarded', JSON.stringify([...ghAwarded])); }catch(e){}
-      GOHOUBI.award(ghMini, 300);
+      GOHOUBI.award(ghMini, 300, 'hakken');
       ghMini();
     }
   }

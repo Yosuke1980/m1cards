@@ -321,9 +321,10 @@ function answer(btn, ok){
     $('card').classList.add('flash');
     setTimeout(()=>$('card').classList.remove('flash'), 550);
     $('card-note').textContent = 'せいかい！🎉';
-    const shown = GOHOUBI.award(()=>{ ghMini(); nextQ(); }, 700);
+    const res = GOHOUBI.award(()=>{ ghMini(); nextQ(); }, 700, 'hanashi');
     ghMini();
-    if(!shown) setTimeout(nextQ, 900);
+    if(res.capped) $('card-note').innerHTML = 'せいかい！でも この きょうかの ⭐は まんタン！<br>ほかの きょうかも やって あつめよう🎒';
+    if(!res.shown) setTimeout(nextQ, 900);
   }else{
     GOHOUBI.miss(); ghMini();
     if(btn) btn.classList.add('wrong');

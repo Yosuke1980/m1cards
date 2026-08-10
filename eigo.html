@@ -1260,9 +1260,10 @@ function answer(btn, ok){
     if(cur.ena) setTimeout(()=>speak(cur.ena), 500);
     const ai = againPool.indexOf(cur.i);
     if(ai>=0){ againPool.splice(ai,1); saveAgain(); }
-    const shown = GOHOUBI.award(()=>{ ghMini(); render(); }, 800);
+    const res = GOHOUBI.award(()=>{ ghMini(); render(); }, 800, 'eigo');
     ghMini();
-    if(!shown) setTimeout(render, 950);
+    if(res.capped) $('card-note').innerHTML = 'せいかい！でも この きょうかの ⭐は まんタン！<br>ほかの きょうかも やって あつめよう🎒';
+    if(!res.shown) setTimeout(render, 950);
   }else{
     streak = 0;
     GOHOUBI.miss(); ghMini();
