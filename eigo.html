@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#111013">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>えいごカード</title>
+<title>えいごカード（えいかいわ）</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
@@ -109,7 +109,7 @@ h1{font-size:24px;font-weight:900;border-left:6px solid var(--red);padding-left:
 <body>
 
 <header>
-  <p class="eyebrow">ENGLISH CARD</p>
+  <p class="eyebrow">ENGLISH CARD — LET&#39;S TALK!</p>
   <h1>えいごカード</h1>
 </header>
 
@@ -117,11 +117,10 @@ h1{font-size:24px;font-weight:900;border-left:6px solid var(--red);padding-left:
 
 <div class="filters" id="cat-filters">
   <button data-c="all" class="active">ぜんぶ</button>
-  <button data-c="どうぶつ">どうぶつ</button>
-  <button data-c="いろ">いろ</button>
-  <button data-c="かず">かず</button>
-  <button data-c="たべもの">たべもの</button>
-  <button data-c="あいさつ">あいさつ</button>
+  <button data-c="かいわ">かいわ</button>
+  <button data-c="いみ">いみ</button>
+  <button data-c="ぶんをつくる">ぶんをつくる</button>
+  <button data-c="たんご">たんご</button>
 </div>
 
 <div class="status">
@@ -241,437 +240,907 @@ sndBtn.addEventListener('click', ()=>{
 });
 updSndBtn();
 
+// ---- えいご音声（ブラウザ内蔵の読み上げ・外部音源なし） ----
+let enVoice = null;
+function pickVoice(){
+  const vs = speechSynthesis.getVoices();
+  enVoice = vs.find(v=>v.lang==='en-US' && v.name.includes('Samantha')) ||
+            vs.find(v=>v.lang==='en-US') || vs.find(v=>v.lang.startsWith('en')) || null;
+}
+if('speechSynthesis' in window){
+  pickVoice();
+  speechSynthesis.onvoiceschanged = pickVoice;
+}
+function speak(text){
+  if(!('speechSynthesis' in window) || !text) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  if(enVoice) u.voice = enVoice;
+  u.rate = 0.8;
+  speechSynthesis.speak(u);
+}
+document.getElementById('card').addEventListener('click', ()=>{
+  if(cur && cur.en) speak(cur.en);
+});
+
 // ---- デッキ（固定問題） ----
 const DECK = [
 {
-"c": "どうぶつ",
+"c": "かいわ",
+"q": "<span class=\"pic\">💬</span>What's your name?",
+"a": "My name is ○○.",
+"alt": [
+"I'm fine.",
+"I like blue.",
+"It's a dog."
+],
+"en": "What's your name?",
+"ena": null
+},
+{
+"c": "かいわ",
+"q": "<span class=\"pic\">💬</span>How are you?",
+"a": "I'm fine, thank you.",
+"alt": [
+"I'm six.",
+"My name is ○○.",
+"It's a cat."
+],
+"en": "How are you?",
+"ena": "I'm fine, thank you."
+},
+{
+"c": "かいわ",
+"q": "<span class=\"pic\">💬</span>How old are you?",
+"a": "I'm six years old.",
+"alt": [
+"I'm fine.",
+"I like apples.",
+"Good night."
+],
+"en": "How old are you?",
+"ena": "I'm six years old."
+},
+{
+"c": "かいわ",
+"q": "<span class=\"pic\">💬</span>Where do you live?",
+"a": "I live in Yokohama.",
+"alt": [
+"I like Yokohama.",
+"My name is ○○.",
+"It's sunny."
+],
+"en": "Where do you live?",
+"ena": "I live in Yokohama."
+},
+{
+"c": "かいわ",
+"q": "<span class=\"pic\">💬</span>What color do you like?",
+"a": "I like blue.",
+"alt": [
+"I'm blue.",
+"It's a pen.",
+"I'm fine."
+],
+"en": "What color do you like?",
+"ena": "I like blue."
+},
+{
+"c": "かいわ",
+"q": "<span class=\"pic\">💬</span>What food do you like?",
+"a": "I like sushi.",
+"alt": [
+"I'm sushi.",
+"I'm hungry.",
+"Yes, I do."
+],
+"en": "What food do you like?",
+"ena": "I like sushi."
+},
+{
+"c": "かいわ",
+"q": "<span class=\"pic\">💬</span>What animal do you like?",
+"a": "I like dogs.",
+"alt": [
+"I'm a dog.",
+"Dogs like me.",
+"I'm fine."
+],
+"en": "What animal do you like?",
+"ena": "I like dogs."
+},
+{
+"c": "かいわ",
+"q": "<span class=\"pic\">💬</span>What sport do you like?",
+"a": "I like soccer.",
+"alt": [
+"I'm soccer.",
+"Yes, I do.",
+"Good morning."
+],
+"en": "What sport do you like?",
+"ena": "I like soccer."
+},
+{
+"c": "かいわ",
+"q": "<span class=\"pic\">💬</span>Do you like cats?",
+"a": "Yes, I do.",
+"alt": [
+"Yes, I am.",
+"I'm a cat.",
+"Yes, you do."
+],
+"en": "Do you like cats?",
+"ena": "Yes, I do."
+},
+{
+"c": "かいわ",
+"q": "<span class=\"pic\">💬</span>Do you like carrots?",
+"a": "No, I don't.",
+"alt": [
+"No, I'm not.",
+"No, you don't.",
+"I'm a carrot."
+],
+"en": "Do you like carrots?",
+"ena": "No, I don't."
+},
+{
+"c": "かいわ",
+"q": "<span class=\"pic\">💬</span>What's this?",
+"a": "It's a pen.",
+"alt": [
+"I'm a pen.",
+"Yes, it is.",
+"Pen is me."
+],
+"en": "What's this?",
+"ena": "It's a pen."
+},
+{
+"c": "かいわ",
+"q": "<span class=\"pic\">💬</span>Good morning!",
+"a": "Good morning!",
+"alt": [
+"Good night!",
+"Bye!",
+"Thank you!"
+],
+"en": "Good morning!",
+"ena": "Good morning!"
+},
+{
+"c": "かいわ",
+"q": "<span class=\"pic\">💬</span>Thank you!",
+"a": "You're welcome.",
+"alt": [
+"I'm sorry.",
+"Me too.",
+"Good night."
+],
+"en": "Thank you!",
+"ena": "You're welcome."
+},
+{
+"c": "かいわ",
+"q": "<span class=\"pic\">💬</span>See you!",
+"a": "See you!",
+"alt": [
+"Good morning!",
+"I'm fine!",
+"Hello!"
+],
+"en": "See you!",
+"ena": "See you!"
+},
+{
+"c": "かいわ",
+"q": "<span class=\"pic\">💬</span>I'm sorry.",
+"a": "That's OK.",
+"alt": [
+"Thank you.",
+"I'm six.",
+"It's a dog."
+],
+"en": "I'm sorry.",
+"ena": "That's OK."
+},
+{
+"c": "いみ",
+"q": "<span class=\"pic\">🧠</span>「I like red.」って どういう いみ？",
+"a": "あかが すき",
+"alt": [
+"あかが きらい",
+"あおが すき",
+"あかい ぼうし"
+],
+"en": "I like red.",
+"ena": null
+},
+{
+"c": "いみ",
+"q": "<span class=\"pic\">🧠</span>「I'm six years old.」って どういう いみ？",
+"a": "6さいです",
+"alt": [
+"6じです",
+"6にんです",
+"6がつです"
+],
+"en": "I'm six years old.",
+"ena": null
+},
+{
+"c": "いみ",
+"q": "<span class=\"pic\">🧠</span>「I live in Yokohama.」って どういう いみ？",
+"a": "よこはまに すんでいます",
+"alt": [
+"よこはまに いきたい",
+"よこはまが すき",
+"よこはまで あそぶ"
+],
+"en": "I live in Yokohama.",
+"ena": null
+},
+{
+"c": "いみ",
+"q": "<span class=\"pic\">🧠</span>「What's your name?」って どういう いみ？",
+"a": "なまえは なに？",
+"alt": [
+"なんさい？",
+"どこに すんでるの？",
+"げんき？"
+],
+"en": "What's your name?",
+"ena": null
+},
+{
+"c": "いみ",
+"q": "<span class=\"pic\">🧠</span>「How old are you?」って どういう いみ？",
+"a": "なんさい？",
+"alt": [
+"なまえは なに？",
+"げんき？",
+"どこに いくの？"
+],
+"en": "How old are you?",
+"ena": null
+},
+{
+"c": "いみ",
+"q": "<span class=\"pic\">🧠</span>「Where do you live?」って どういう いみ？",
+"a": "どこに すんでるの？",
+"alt": [
+"なにが すき？",
+"なんさい？",
+"だれ？"
+],
+"en": "Where do you live?",
+"ena": null
+},
+{
+"c": "いみ",
+"q": "<span class=\"pic\">🧠</span>「I'm hungry.」って どういう いみ？",
+"a": "おなかが すいた",
+"alt": [
+"ねむい",
+"のどが かわいた",
+"おなかが いっぱい"
+],
+"en": "I'm hungry.",
+"ena": null
+},
+{
+"c": "いみ",
+"q": "<span class=\"pic\">🧠</span>「I'm sleepy.」って どういう いみ？",
+"a": "ねむい",
+"alt": [
+"おなかが すいた",
+"さむい",
+"たのしい"
+],
+"en": "I'm sleepy.",
+"ena": null
+},
+{
+"c": "いみ",
+"q": "<span class=\"pic\">🧠</span>「Let's play!」って どういう いみ？",
+"a": "あそぼう！",
+"alt": [
+"たべよう！",
+"ねよう！",
+"かえろう！"
+],
+"en": "Let's play!",
+"ena": null
+},
+{
+"c": "いみ",
+"q": "<span class=\"pic\">🧠</span>「I can swim.」って どういう いみ？",
+"a": "およげるよ",
+"alt": [
+"およげないよ",
+"はしれるよ",
+"とべるよ"
+],
+"en": "I can swim.",
+"ena": null
+},
+{
+"c": "ぶんをつくる",
+"q": "<span class=\"pic\">🧩</span>I ___ blue.<br><small style=\"font-size:16px;color:#a49e94;\">（あおが すき）</small>",
+"a": "like",
+"alt": [
+"am",
+"is",
+"eat"
+],
+"en": null,
+"ena": "I like blue."
+},
+{
+"c": "ぶんをつくる",
+"q": "<span class=\"pic\">🧩</span>I ___ six years old.<br><small style=\"font-size:16px;color:#a49e94;\">（6さいです）</small>",
+"a": "am",
+"alt": [
+"is",
+"like",
+"do"
+],
+"en": null,
+"ena": "I am six years old."
+},
+{
+"c": "ぶんをつくる",
+"q": "<span class=\"pic\">🧩</span>My name ___ Ken.<br><small style=\"font-size:16px;color:#a49e94;\">（なまえは ケン）</small>",
+"a": "is",
+"alt": [
+"am",
+"are",
+"like"
+],
+"en": null,
+"ena": "My name is Ken."
+},
+{
+"c": "ぶんをつくる",
+"q": "<span class=\"pic\">🧩</span>I live ___ Yokohama.<br><small style=\"font-size:16px;color:#a49e94;\">（よこはまに すんでいます）</small>",
+"a": "in",
+"alt": [
+"on",
+"at",
+"to"
+],
+"en": null,
+"ena": "I live in Yokohama."
+},
+{
+"c": "ぶんをつくる",
+"q": "<span class=\"pic\">🧩</span>___ you like dogs?<br><small style=\"font-size:16px;color:#a49e94;\">（いぬは すき？）</small>",
+"a": "Do",
+"alt": [
+"Are",
+"Is",
+"Am"
+],
+"en": null,
+"ena": "Do you like dogs?"
+},
+{
+"c": "たんご",
 "q": "<span class=\"pic\">🐶</span>いぬ は えいごで？",
 "a": "dog",
 "alt": [
 "cat",
 "bear",
 "fish"
-]
+],
+"en": null,
+"ena": "dog"
 },
 {
-"c": "どうぶつ",
+"c": "たんご",
 "q": "<span class=\"pic\">🐱</span>ねこ は えいごで？",
 "a": "cat",
 "alt": [
 "dog",
 "lion",
 "bird"
-]
+],
+"en": null,
+"ena": "cat"
 },
 {
-"c": "どうぶつ",
+"c": "たんご",
 "q": "<span class=\"pic\">🐰</span>うさぎ は えいごで？",
 "a": "rabbit",
 "alt": [
 "bear",
 "cat",
 "monkey"
-]
+],
+"en": null,
+"ena": "rabbit"
 },
 {
-"c": "どうぶつ",
+"c": "たんご",
 "q": "<span class=\"pic\">🐘</span>ぞう は えいごで？",
 "a": "elephant",
 "alt": [
 "lion",
 "horse",
 "bear"
-]
+],
+"en": null,
+"ena": "elephant"
 },
 {
-"c": "どうぶつ",
+"c": "たんご",
 "q": "<span class=\"pic\">🦁</span>ライオン は えいごで？",
 "a": "lion",
 "alt": [
 "elephant",
 "monkey",
 "dog"
-]
+],
+"en": null,
+"ena": "lion"
 },
 {
-"c": "どうぶつ",
+"c": "たんご",
 "q": "<span class=\"pic\">🐟</span>さかな は えいごで？",
 "a": "fish",
 "alt": [
 "bird",
 "dog",
 "cat"
-]
+],
+"en": null,
+"ena": "fish"
 },
 {
-"c": "どうぶつ",
+"c": "たんご",
 "q": "<span class=\"pic\">🐦</span>とり は えいごで？",
 "a": "bird",
 "alt": [
 "fish",
 "rabbit",
 "cat"
-]
+],
+"en": null,
+"ena": "bird"
 },
 {
-"c": "どうぶつ",
+"c": "たんご",
 "q": "<span class=\"pic\">🐴</span>うま は えいごで？",
 "a": "horse",
 "alt": [
 "elephant",
 "dog",
 "lion"
-]
+],
+"en": null,
+"ena": "horse"
 },
 {
-"c": "どうぶつ",
+"c": "たんご",
 "q": "<span class=\"pic\">🐻</span>くま は えいごで？",
 "a": "bear",
 "alt": [
 "rabbit",
 "monkey",
 "cat"
-]
+],
+"en": null,
+"ena": "bear"
 },
 {
-"c": "どうぶつ",
+"c": "たんご",
 "q": "<span class=\"pic\">🐵</span>さる は えいごで？",
 "a": "monkey",
 "alt": [
 "bear",
 "lion",
 "elephant"
-]
+],
+"en": null,
+"ena": "monkey"
 },
 {
-"c": "いろ",
+"c": "たんご",
 "q": "<span class=\"pic\">🔴</span>あか は えいごで？",
 "a": "red",
 "alt": [
 "blue",
 "white",
 "green"
-]
+],
+"en": null,
+"ena": "red"
 },
 {
-"c": "いろ",
+"c": "たんご",
 "q": "<span class=\"pic\">🔵</span>あお は えいごで？",
 "a": "blue",
 "alt": [
 "red",
 "black",
 "yellow"
-]
+],
+"en": null,
+"ena": "blue"
 },
 {
-"c": "いろ",
+"c": "たんご",
 "q": "<span class=\"pic\">🟡</span>きいろ は えいごで？",
 "a": "yellow",
 "alt": [
 "green",
 "orange",
 "red"
-]
+],
+"en": null,
+"ena": "yellow"
 },
 {
-"c": "いろ",
+"c": "たんご",
 "q": "<span class=\"pic\">🟢</span>みどり は えいごで？",
 "a": "green",
 "alt": [
 "blue",
 "yellow",
 "purple"
-]
+],
+"en": null,
+"ena": "green"
 },
 {
-"c": "いろ",
+"c": "たんご",
 "q": "<span class=\"pic\">⚫</span>くろ は えいごで？",
 "a": "black",
 "alt": [
 "white",
 "blue",
 "brown"
-]
+],
+"en": null,
+"ena": "black"
 },
 {
-"c": "いろ",
+"c": "たんご",
 "q": "<span class=\"pic\">⚪</span>しろ は えいごで？",
 "a": "white",
 "alt": [
 "black",
 "pink",
 "brown"
-]
+],
+"en": null,
+"ena": "white"
 },
 {
-"c": "いろ",
+"c": "たんご",
 "q": "<span class=\"pic\">🩷</span>ピンク は えいごで？",
 "a": "pink",
 "alt": [
 "purple",
 "red",
 "white"
-]
+],
+"en": null,
+"ena": "pink"
 },
 {
-"c": "いろ",
+"c": "たんご",
 "q": "<span class=\"pic\">🟠</span>オレンジ は えいごで？",
 "a": "orange",
 "alt": [
 "yellow",
 "brown",
 "red"
-]
+],
+"en": null,
+"ena": "orange"
 },
 {
-"c": "いろ",
+"c": "たんご",
 "q": "<span class=\"pic\">🟣</span>むらさき は えいごで？",
 "a": "purple",
 "alt": [
 "pink",
 "blue",
 "black"
-]
+],
+"en": null,
+"ena": "purple"
 },
 {
-"c": "いろ",
+"c": "たんご",
 "q": "<span class=\"pic\">🟤</span>ちゃいろ は えいごで？",
 "a": "brown",
 "alt": [
 "black",
 "orange",
 "green"
-]
+],
+"en": null,
+"ena": "brown"
 },
 {
-"c": "かず",
-"q": "<span class=\"pic\">🔢</span>1 は えいごで？",
-"a": "one",
-"alt": [
-"two",
-"three",
-"ten"
-]
-},
-{
-"c": "かず",
-"q": "<span class=\"pic\">🔢</span>2 は えいごで？",
-"a": "two",
-"alt": [
-"one",
-"four",
-"five"
-]
-},
-{
-"c": "かず",
-"q": "<span class=\"pic\">🔢</span>3 は えいごで？",
-"a": "three",
-"alt": [
-"two",
-"six",
-"eight"
-]
-},
-{
-"c": "かず",
-"q": "<span class=\"pic\">🔢</span>4 は えいごで？",
-"a": "four",
-"alt": [
-"five",
-"two",
-"nine"
-]
-},
-{
-"c": "かず",
-"q": "<span class=\"pic\">🔢</span>5 は えいごで？",
-"a": "five",
-"alt": [
-"four",
-"six",
-"one"
-]
-},
-{
-"c": "かず",
-"q": "<span class=\"pic\">🔢</span>6 は えいごで？",
-"a": "six",
-"alt": [
-"seven",
-"three",
-"ten"
-]
-},
-{
-"c": "かず",
-"q": "<span class=\"pic\">🔢</span>7 は えいごで？",
-"a": "seven",
-"alt": [
-"six",
-"eight",
-"two"
-]
-},
-{
-"c": "かず",
-"q": "<span class=\"pic\">🔢</span>8 は えいごで？",
-"a": "eight",
-"alt": [
-"nine",
-"seven",
-"three"
-]
-},
-{
-"c": "かず",
-"q": "<span class=\"pic\">🔢</span>9 は えいごで？",
-"a": "nine",
-"alt": [
-"eight",
-"ten",
-"four"
-]
-},
-{
-"c": "かず",
-"q": "<span class=\"pic\">🔢</span>10 は えいごで？",
-"a": "ten",
-"alt": [
-"nine",
-"one",
-"five"
-]
-},
-{
-"c": "たべもの",
+"c": "たんご",
 "q": "<span class=\"pic\">🍎</span>りんご は えいごで？",
 "a": "apple",
 "alt": [
 "banana",
 "cake",
 "egg"
-]
+],
+"en": null,
+"ena": "apple"
 },
 {
-"c": "たべもの",
+"c": "たんご",
 "q": "<span class=\"pic\">🍌</span>バナナ は えいごで？",
 "a": "banana",
 "alt": [
 "apple",
 "bread",
 "milk"
-]
+],
+"en": null,
+"ena": "banana"
 },
 {
-"c": "たべもの",
+"c": "たんご",
 "q": "<span class=\"pic\">🥚</span>たまご は えいごで？",
 "a": "egg",
 "alt": [
 "milk",
 "rice",
 "apple"
-]
+],
+"en": null,
+"ena": "egg"
 },
 {
-"c": "たべもの",
+"c": "たんご",
 "q": "<span class=\"pic\">🥛</span>ぎゅうにゅう は えいごで？",
 "a": "milk",
 "alt": [
 "egg",
 "bread",
 "cake"
-]
+],
+"en": null,
+"ena": "milk"
 },
 {
-"c": "たべもの",
+"c": "たんご",
 "q": "<span class=\"pic\">🍞</span>パン は えいごで？",
 "a": "bread",
 "alt": [
 "rice",
 "cake",
 "banana"
-]
+],
+"en": null,
+"ena": "bread"
 },
 {
-"c": "たべもの",
+"c": "たんご",
 "q": "<span class=\"pic\">🍚</span>ごはん は えいごで？",
 "a": "rice",
 "alt": [
 "bread",
 "egg",
 "apple"
-]
+],
+"en": null,
+"ena": "rice"
 },
 {
-"c": "たべもの",
+"c": "たんご",
 "q": "<span class=\"pic\">🍰</span>ケーキ は えいごで？",
 "a": "cake",
 "alt": [
 "candy",
 "bread",
 "banana"
-]
+],
+"en": null,
+"ena": "cake"
 },
 {
-"c": "たべもの",
+"c": "たんご",
 "q": "<span class=\"pic\">🍬</span>あめ は えいごで？",
 "a": "candy",
 "alt": [
 "cake",
 "apple",
 "egg"
-]
+],
+"en": null,
+"ena": "candy"
 },
 {
-"c": "あいさつ",
-"q": "<span class=\"pic\">💬</span>「おはよう」は えいごで？",
+"c": "たんご",
+"q": "<span class=\"pic\">🔢</span>1 は えいごで？",
+"a": "one",
+"alt": [
+"two",
+"three",
+"ten"
+],
+"en": null,
+"ena": "one"
+},
+{
+"c": "たんご",
+"q": "<span class=\"pic\">🔢</span>2 は えいごで？",
+"a": "two",
+"alt": [
+"one",
+"four",
+"five"
+],
+"en": null,
+"ena": "two"
+},
+{
+"c": "たんご",
+"q": "<span class=\"pic\">🔢</span>3 は えいごで？",
+"a": "three",
+"alt": [
+"two",
+"six",
+"eight"
+],
+"en": null,
+"ena": "three"
+},
+{
+"c": "たんご",
+"q": "<span class=\"pic\">🔢</span>4 は えいごで？",
+"a": "four",
+"alt": [
+"five",
+"two",
+"nine"
+],
+"en": null,
+"ena": "four"
+},
+{
+"c": "たんご",
+"q": "<span class=\"pic\">🔢</span>5 は えいごで？",
+"a": "five",
+"alt": [
+"four",
+"six",
+"one"
+],
+"en": null,
+"ena": "five"
+},
+{
+"c": "たんご",
+"q": "<span class=\"pic\">🔢</span>6 は えいごで？",
+"a": "six",
+"alt": [
+"seven",
+"three",
+"ten"
+],
+"en": null,
+"ena": "six"
+},
+{
+"c": "たんご",
+"q": "<span class=\"pic\">🔢</span>7 は えいごで？",
+"a": "seven",
+"alt": [
+"six",
+"eight",
+"two"
+],
+"en": null,
+"ena": "seven"
+},
+{
+"c": "たんご",
+"q": "<span class=\"pic\">🔢</span>8 は えいごで？",
+"a": "eight",
+"alt": [
+"nine",
+"seven",
+"three"
+],
+"en": null,
+"ena": "eight"
+},
+{
+"c": "たんご",
+"q": "<span class=\"pic\">🔢</span>9 は えいごで？",
+"a": "nine",
+"alt": [
+"eight",
+"ten",
+"four"
+],
+"en": null,
+"ena": "nine"
+},
+{
+"c": "たんご",
+"q": "<span class=\"pic\">🔢</span>10 は えいごで？",
+"a": "ten",
+"alt": [
+"nine",
+"one",
+"five"
+],
+"en": null,
+"ena": "ten"
+},
+{
+"c": "たんご",
+"q": "<span class=\"pic\">💬</span>おはよう は えいごで？",
 "a": "good morning",
 "alt": [
 "good night",
 "thank you",
 "bye"
-]
+],
+"en": null,
+"ena": "good morning"
 },
 {
-"c": "あいさつ",
-"q": "<span class=\"pic\">💬</span>「こんにちは」は えいごで？",
+"c": "たんご",
+"q": "<span class=\"pic\">💬</span>こんにちは は えいごで？",
 "a": "hello",
 "alt": [
 "bye",
 "good night",
 "thank you"
-]
+],
+"en": null,
+"ena": "hello"
 },
 {
-"c": "あいさつ",
-"q": "<span class=\"pic\">💬</span>「ありがとう」は えいごで？",
+"c": "たんご",
+"q": "<span class=\"pic\">💬</span>ありがとう は えいごで？",
 "a": "thank you",
 "alt": [
 "hello",
 "sorry",
 "bye"
-]
+],
+"en": null,
+"ena": "thank you"
 },
 {
-"c": "あいさつ",
-"q": "<span class=\"pic\">💬</span>「さようなら」は えいごで？",
+"c": "たんご",
+"q": "<span class=\"pic\">💬</span>さようなら は えいごで？",
 "a": "bye",
 "alt": [
 "hello",
 "thank you",
 "good morning"
-]
+],
+"en": null,
+"ena": "bye"
 },
 {
-"c": "あいさつ",
-"q": "<span class=\"pic\">💬</span>「おやすみ」は えいごで？",
+"c": "たんご",
+"q": "<span class=\"pic\">💬</span>おやすみ は えいごで？",
 "a": "good night",
 "alt": [
 "good morning",
 "hello",
 "thank you"
-]
+],
+"en": null,
+"ena": "good night"
 }
 ];
 
@@ -716,8 +1185,9 @@ function render(){
   ghMini();
   $('cat-badge').textContent = cur.c;
   $('q-text').innerHTML = cur.q;
-  $('card-note').textContent = 'したの4つからえらんでね';
+  $('card-note').textContent = cur.en ? '🔊カードをタップすると もういちど きけるよ' : 'したの4つからえらんでね';
   $('card').classList.toggle('is-again', cur.again);
+  if(cur.en) setTimeout(()=>speak(cur.en), 400);
   const opts = [cur.a, ...cur.alt];
   for(let i=opts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]]; }
   const el = $('choices');
@@ -758,6 +1228,7 @@ function answer(btn, ok){
     setTimeout(()=>$('card').classList.remove('flash'), 550);
     $('card-note').textContent = streak>=3 ? '🔥 ' + streak + 'れんぞくせいかい！' : 'せいかい！🎉';
     if(streak>=3){ confetti(streak>=5 ? 26 : 14); sndDon(); }
+    if(cur.ena) setTimeout(()=>speak(cur.ena), 500);
     const ai = againPool.indexOf(cur.i);
     if(ai>=0){ againPool.splice(ai,1); saveAgain(); }
     const shown = GOHOUBI.award(()=>{ ghMini(); render(); }, 800);
