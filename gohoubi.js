@@ -24,7 +24,19 @@
     '.gh-box .gh-sub{font-size:14px;color:#a49e94;line-height:1.9;}',
     '.gh-box button{margin-top:18px;font-family:inherit;font-size:15px;font-weight:700;padding:12px 30px;border-radius:999px;border:none;background:#d1352b;color:#fff;cursor:pointer;}',
     '.gh-conf{position:fixed;top:-16px;z-index:70;pointer-events:none;border-radius:2px;animation:ghFall linear forwards;}',
-    '@keyframes ghFall{to{transform:translateY(108vh) rotate(720deg);opacity:.85;}}'
+    '@keyframes ghFall{to{transform:translateY(108vh) rotate(720deg);opacity:.85;}}',
+    '.rw-panel{background:#1c1a1f;border:1px solid #38343d;border-radius:12px;padding:20px;margin-bottom:14px;box-shadow:0 0 0 1px rgba(217,164,65,.28);}',
+    '.rw-title{font-size:16px;font-weight:900;color:#d9a441;margin-bottom:14px;}',
+    '.stamp-row{display:flex;gap:9px;flex-wrap:wrap;}',
+    '.stamp{width:44px;height:44px;border-radius:50%;border:2px dashed #38343d;display:flex;align-items:center;justify-content:center;font-size:22px;color:#38343d;}',
+    '.stamp.on{border:2px solid #d9a441;background:rgba(217,164,65,.18);color:#d9a441;}',
+    '.rw-note{font-size:13px;color:#a49e94;margin-top:12px;line-height:1.9;}',
+    '.medal-shelf{font-size:36px;line-height:1.6;word-break:break-all;}',
+    '.medal-count{font-size:15px;font-weight:700;margin-top:6px;color:#f2efe9;}',
+    '.ticket{display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(90deg,rgba(217,164,65,.16),transparent);border:1px dashed #d9a441;border-radius:10px;padding:14px 16px;margin-bottom:10px;font-size:16px;font-weight:900;color:#f2efe9;}',
+    '.ticket.used{opacity:.4;border-color:#38343d;background:none;}',
+    '.ticket button{font-family:inherit;font-size:13px;font-weight:700;padding:9px 16px;border-radius:8px;border:1px solid #d9a441;background:transparent;color:#d9a441;cursor:pointer;}',
+    '.ticket.used button{border-color:#38343d;color:#a49e94;cursor:default;}',
   ].join('\n');
   const st = document.createElement('style');
   st.textContent = css;
@@ -100,6 +112,46 @@
         return {stamped:true, capped:false, shown:true};
       }
       return {stamped:true, capped:false, shown:false};
+    }
+    ,
+    // ごほうび画面（スタンプ・メダル・けん）を任意のコンテナに描画する共通部品
+    renderPanel(el){
+      const names = {sansu:'さんすう', eigo:'えいご', kokugo:'こくご', joushiki:'じょうしき', hanashi:'おはなし', hakken:'はっけん', etc:'そのほか'};
+      let sr = '';
+      for(let i=0;i<10;i++) sr += '<div class="stamp'+(i<rw.s?' on':'')+'">'+(i<rw.s?'⭐':'')+'</div>';
+      const subj = rw.subj || {};
+      const parts = Object.keys(subj).map(k=>(names[k]||k)+' '+subj[k]+'こ');
+      const next = 3 - (rw.m % 3);
+      let h = '<div class="rw-panel"><p class="rw-title">⭐ スタンプカード（れんぞくせいかいで たまる）</p>'+
+        '<div class="stamp-row">'+sr+'</div>'+
+        '<p class="rw-note">れんぞくで10もん せいかいすると メダル1こ！<br>まちがえると ⭐は0に もどるよ（メダルは へらない）</p>'+
+        '<p class="rw-note">ひとつの きょうかで ためられるのは <b style="color:#d9a441;">4こまで</b>。いろんな きょうかを やろう！'+
+        (parts.length ? '<br>いまのカード: '+parts.join('・') : '')+'</p></div>';
+      h += '<div class="rw-panel"><p class="rw-title">🏅 メダルだな</p>'+
+        '<div class="medal-shelf">'+(rw.m ? '🏅'.repeat(Math.min(rw.m,30)) : 'まだないよ。クイズで あつめよう！')+'</div>'+
+        '<p class="medal-count">メダル '+rw.m+' こ'+(rw.m ? '（あと'+next+'こで ごほうびけん！）' : '')+'</p>'+
+        '<p class="rw-note">メダル3こで「ごほうびけん」1まい！</p></div>';
+      h += '<div class="rw-panel"><p class="rw-title">🎫 ごほうびけん</p><div class="gh-tickets"></div>'+
+        '<p class="rw-note">おうちのひとに みせて、ごほうびと こうかんしよう！<br>（なにと こうかんできるかは おうちのひとが きめるよ）</p></div>';
+      el.innerHTML = h;
+      const tl = el.querySelector('.gh-tickets');
+      if(!rw.t.length){ tl.innerHTML = '<p class="rw-note">まだないよ。メダル3こで 1まい もらえるよ！</p>'; }
+      else{
+        [...rw.t].reverse().forEach(tk=>{
+          const d = document.createElement('div');
+          d.className = 'ticket' + (tk.u ? ' used' : '');
+          d.innerHTML = '<span>🎫 ごほうびけん</span>';
+          const b = document.createElement('button');
+          b.textContent = tk.u ? 'つかったよ' : 'つかう';
+          if(!tk.u) b.addEventListener('click', ()=>{
+            if(confirm('ごほうびと こうかんした？（おうちのひとと いっしょにおしてね）')){
+              tk.u = true; save(); window.GOHOUBI.renderPanel(el);
+            }
+          });
+          d.appendChild(b);
+          tl.appendChild(d);
+        });
+      }
     }
   };
 })();

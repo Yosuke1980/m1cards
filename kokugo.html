@@ -36,6 +36,21 @@ h1{font-size:24px;font-weight:900;border-left:6px solid var(--red);padding-left:
   border-radius:999px;padding:5px 12px;white-space:nowrap;
 }
 .nav span{background:var(--gold);border-color:var(--gold);color:#1a1408;font-weight:700;}
+.mode-toggle{width:100%;max-width:740px;display:flex;gap:8px;margin-bottom:12px;}
+.mode-toggle button{flex:1;font-family:inherit;font-size:14px;font-weight:700;padding:12px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--text-dim);cursor:pointer;}
+.mode-toggle button.active{background:var(--gold);border-color:var(--gold);color:#1a1408;}
+.tables,.reward{display:none;width:100%;max-width:740px;}
+body.hyo-mode .tables{display:block;}
+body.reward-mode .reward{display:block;}
+body.hyo-mode .card,body.hyo-mode .choices,body.hyo-mode .filters,body.hyo-mode .status,
+body.reward-mode .card,body.reward-mode .choices,body.reward-mode .filters,body.reward-mode .status{display:none;}
+.tbl-panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px;box-shadow:0 0 0 1px rgba(217,164,65,.28);}
+.tbl-title{font-size:16px;font-weight:900;color:var(--gold);margin-bottom:8px;}
+.hyo-row{display:flex;justify-content:space-between;gap:12px;padding:8px 4px;border-bottom:1px dashed var(--line);font-size:15px;line-height:1.9;align-items:baseline;}
+.hyo-row:last-child{border-bottom:none;}
+.hyo-row .hq{color:var(--text-dim);text-align:left;}
+.hyo-row .ha{font-weight:900;color:var(--gold);text-align:right;white-space:nowrap;flex-shrink:0;cursor:default;}
+.hyo-row .ha[data-say]{cursor:pointer;}
 .filters{display:flex;gap:8px;flex-wrap:wrap;width:100%;max-width:740px;margin-bottom:10px;}
 .filters button{
   font-family:inherit;font-size:14px;font-weight:700;padding:10px 18px;
@@ -115,6 +130,12 @@ h1{font-size:24px;font-weight:900;border-left:6px solid var(--red);padding-left:
 
 <div class="nav"><a href="sansu.html">🔢 さんすう</a><a href="eigo.html">🔤 えいご</a><span>✏️ こくご</span><a href="joushiki.html">🌏 じょうしき</a><a href="hanashi.html">📖 おはなし</a><a href="index.html">🎤 M-1</a></div>
 
+<div class="mode-toggle">
+  <button data-m="quiz" class="active">クイズ 🔥</button>
+  <button data-m="hyo">ひょう 📖</button>
+  <button data-m="reward">ごほうび 🏅</button>
+</div>
+
 <div class="filters" id="cat-filters">
   <button data-c="all" class="active">ぜんぶ</button>
   <button data-c="カタカナ">カタカナ</button>
@@ -137,6 +158,9 @@ h1{font-size:24px;font-weight:900;border-left:6px solid var(--red);padding-left:
 </div>
 
 <div class="choices" id="choices"></div>
+
+<div class="tables" id="hyo"></div>
+<div class="reward" id="reward"></div>
 
 <script src="gohoubi.js"></script>
 <script>
@@ -741,6 +765,34 @@ document.querySelectorAll('#cat-filters button').forEach(b=>{
 
 buildPool();
 render();
+
+// ---- モード切替（クイズ/ひょう/ごほうび） ----
+document.querySelectorAll('.mode-toggle button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.mode-toggle button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.body.classList.toggle('hyo-mode', b.dataset.m==='hyo');
+    document.body.classList.toggle('reward-mode', b.dataset.m==='reward');
+    if(b.dataset.m==='reward') GOHOUBI.renderPanel(document.getElementById('reward'));
+  });
+});
+
+// ---- ひょう（こたえの一覧表） ----
+(function buildHyo(){
+  const el = document.getElementById('hyo');
+  const cats = [];
+  DECK.forEach(d=>{ if(!cats.includes(d.c)) cats.push(d.c); });
+  let h = '';
+  cats.forEach(c=>{
+    h += '<div class="tbl-panel"><p class="tbl-title">\uD83D\uDCD6 '+c+'</p>';
+    DECK.filter(d=>d.c===c).forEach(d=>{
+      const q = d.q.replace(/<span class="pic">[\s\S]*?<\/span>/,'').replace(/<br>[\s\S]*$/,'').replace(/<[^>]+>/g,'');
+      h += '<div class="hyo-row"><span class="hq">'+q+'</span>' + '<span class="ha">'+d.a+'</span>' + '</div>';
+    });
+    h += '</div>';
+  });
+  el.innerHTML = h;
+})();
 </script>
 </body>
 </html>
