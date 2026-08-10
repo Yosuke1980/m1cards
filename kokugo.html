@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#111013">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>こくごカード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#111013; --panel:#1c1a1f; --panel-2:#242127; --line:#38343d;
+  --red:#d1352b; --red-deep:#8f1f18; --gold:#d9a441; --text:#f2efe9; --text-dim:#a49e94;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+button,.card{touch-action:manipulation;}
+body{
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(209,53,43,.20), transparent 60%),
+    radial-gradient(ellipse 45% 35% at 15% 110%, rgba(217,164,65,.10), transparent 60%),
+    radial-gradient(ellipse 45% 35% at 85% 110%, rgba(217,164,65,.10), transparent 60%),
+    var(--bg);
+  color:var(--text); font-family:"Zen Maru Gothic",sans-serif;
+  min-height:100vh; display:flex; flex-direction:column; align-items:center;
+  padding:32px 16px 64px;
+}
+header{width:100%;max-width:740px;margin-bottom:14px;}
+.eyebrow{font-size:12px;letter-spacing:0.3em;color:var(--gold);font-weight:700;margin-bottom:6px;}
+h1{font-size:24px;font-weight:900;border-left:6px solid var(--red);padding-left:14px;line-height:1.6;}
+.nav{width:100%;max-width:740px;display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.nav a,.nav span{
+  font-size:12px;color:var(--text-dim);text-decoration:none;border:1px solid var(--line);
+  border-radius:999px;padding:5px 12px;white-space:nowrap;
+}
+.nav span{background:var(--gold);border-color:var(--gold);color:#1a1408;font-weight:700;}
+.filters{display:flex;gap:8px;flex-wrap:wrap;width:100%;max-width:740px;margin-bottom:10px;}
+.filters button{
+  font-family:inherit;font-size:14px;font-weight:700;padding:10px 18px;
+  background:var(--panel);color:var(--text-dim);border:1px solid var(--line);border-radius:999px;cursor:pointer;
+}
+.filters button.active{background:var(--red);border-color:var(--red);color:#fff;}
+.status{
+  width:100%;max-width:740px;display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:10px;font-size:13px;color:var(--text-dim);
+}
+.status .score{color:var(--gold);font-weight:700;}
+.status .snd{font-family:inherit;font-size:14px;padding:4px 9px;background:var(--panel);border:1px solid var(--line);border-radius:4px;cursor:pointer;}
+.status a{color:var(--gold);font-weight:700;text-decoration:none;margin-right:8px;}
+.card{
+  width:100%;max-width:740px;min-height:190px;
+  background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--red);border-radius:12px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  padding:36px 24px;position:relative;user-select:none;
+  box-shadow:0 0 0 1px rgba(217,164,65,.28), 0 14px 44px rgba(0,0,0,.5);
+}
+.card.flash{animation:flashGold .5s;}
+@keyframes flashGold{
+  0%{box-shadow:0 0 0 3px var(--gold), 0 0 70px rgba(217,164,65,.85);}
+  100%{box-shadow:0 0 0 1px rgba(217,164,65,.28), 0 14px 44px rgba(0,0,0,.5);}
+}
+.shake{animation:shake .4s;}
+@keyframes shake{
+  0%,100%{transform:translateX(0);}
+  20%{transform:translateX(-8px);}40%{transform:translateX(8px);}
+  60%{transform:translateX(-5px);}80%{transform:translateX(5px);}
+}
+.q-text{font-size:34px;font-weight:900;line-height:1.7;}
+.q-text .pic{font-size:64px;display:block;margin-bottom:6px;line-height:1.3;}
+.card-note{font-size:13px;color:var(--text-dim);margin-top:14px;line-height:1.8;}
+.card-note .ans{color:var(--gold);font-weight:900;font-size:20px;}
+.again-tag{
+  position:absolute;top:12px;left:14px;font-size:12px;font-weight:700;color:#f0857c;
+  border:1px solid #e2483d;border-radius:4px;padding:3px 10px;display:none;
+}
+.card.is-again .again-tag{display:block;}
+.badge{
+  position:absolute;top:12px;right:14px;display:inline-block;font-size:12px;font-weight:700;
+  padding:4px 12px;border-radius:4px;background:var(--red-deep);color:#fff;
+}
+.choices{width:100%;max-width:740px;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+.choices button{
+  font-family:inherit;font-size:22px;font-weight:900;line-height:1.7;padding:16px 14px;border-radius:8px;
+  border:1px solid var(--line);border-left:5px solid var(--gold);
+  background:linear-gradient(180deg,#242127,#191619);color:var(--text);cursor:pointer;
+  box-shadow:0 3px 10px rgba(0,0,0,.35);
+}
+@media (hover:hover){.choices button:hover:not(:disabled){border-color:var(--red);}}
+.choices button.correct{background:#2f7d4a;border-color:#2f7d4a;color:#fff;}
+.choices button.wrong{background:var(--red-deep);border-color:var(--red-deep);color:#fff;}
+.choices button:disabled{cursor:default;}
+.choices button.next-q{
+  grid-column:1/-1;font-size:16px;font-weight:700;padding:14px;
+  border-color:var(--red);border-left:5px solid var(--red);background:var(--red);color:#fff;
+}
+@media (max-width:560px){
+  body{padding:12px 12px 40px;}
+  h1{font-size:18px;}
+  .filters button{padding:8px 13px;font-size:13px;}
+  .q-text{font-size:26px;}
+  .q-text .pic{font-size:54px;}
+  .choices button{font-size:18px;padding:13px 10px;}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">KOKUGO CARD</p>
+  <h1>こくごカード</h1>
+</header>
+
+<div class="nav"><a href="sansu.html">🔢 さんすう</a><a href="eigo.html">🔤 えいご</a><span>✏️ こくご</span><a href="joushiki.html">🌏 じょうしき</a><a href="hakken.html">🔍 はっけん</a><a href="index.html">🎤 M-1</a></div>
+
+<div class="filters" id="cat-filters">
+  <button data-c="all" class="active">ぜんぶ</button>
+  <button data-c="カタカナ">カタカナ</button>
+  <button data-c="はんたいことば">はんたいことば</button>
+  <button data-c="かぞえかた">かぞえかた</button>
+  <button data-c="かん字">かん字</button>
+</div>
+
+<div class="status">
+  <span id="counter">もんだい 1</span>
+  <span class="score" id="score"></span>
+  <span><a id="gh-mini" href="sansu.html#gohoubi"></a><button id="snd-btn" class="snd" aria-label="おとのオンオフ">🔊</button></span>
+</div>
+
+<div class="card" id="card">
+  <span class="again-tag">💪 もういっかい</span>
+  <span class="badge" id="cat-badge"></span>
+  <p class="q-text" id="q-text"></p>
+  <p class="card-note" id="card-note">したの4つからえらんでね</p>
+</div>
+
+<div class="choices" id="choices"></div>
+
+<script src="gohoubi.js"></script>
+<script>
+// ---- サウンド（さんすうカードと同じ自作効果音・外部音源なし） ----
+let sndOn = true;
+try{ sndOn = localStorage.getItem('kokugo-sound') !== 'off'; }catch(e){}
+let ac = null;
+function actx(){
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if(!ac) ac = new AC();
+  if(ac.state === 'suspended') ac.resume();
+  return ac;
+}
+function envGain(g, t0, peak, dur){
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.linearRampToValueAtTime(peak, t0+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+}
+function noiseBuf(){
+  if(noiseBuf.b) return noiseBuf.b;
+  const c = actx(), b = c.createBuffer(1, c.sampleRate*0.5, c.sampleRate);
+  const d = b.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+  return noiseBuf.b = b;
+}
+let masterNode = null;
+function makeIR(dur, decay){
+  const c = actx(), len = Math.floor(c.sampleRate*dur);
+  const b = c.createBuffer(2, len, c.sampleRate);
+  for(let ch=0; ch<2; ch++){
+    const d = b.getChannelData(ch);
+    for(let i=0; i<len; i++) d[i] = (Math.random()*2-1) * Math.pow(1-i/len, decay);
+  }
+  return b;
+}
+function master(){
+  const c = actx();
+  if(!masterNode){
+    const inp = c.createGain();
+    const comp = c.createDynamicsCompressor();
+    comp.threshold.value = -14; comp.knee.value = 20; comp.ratio.value = 6;
+    comp.connect(c.destination);
+    inp.connect(comp);
+    const conv = c.createConvolver(); conv.buffer = makeIR(1.8, 2.5);
+    const wet = c.createGain(); wet.gain.value = 0.35;
+    inp.connect(conv); conv.connect(wet); wet.connect(comp);
+    masterNode = inp;
+  }
+  return masterNode;
+}
+function playNoise(t0, dur, freq, peak){
+  const c = actx();
+  const s = c.createBufferSource(); s.buffer = noiseBuf(); s.loop = true;
+  const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = freq;
+  const g = c.createGain(); envGain(g, t0, peak, dur);
+  s.connect(f); f.connect(g); g.connect(master());
+  s.start(t0); s.stop(t0+dur+0.05);
+}
+function tone(t0, freq, dur, type, peak, slideTo){
+  const c = actx();
+  const o = c.createOscillator(); o.type = type; o.frequency.setValueAtTime(freq, t0);
+  if(slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t0+dur);
+  const g = c.createGain(); envGain(g, t0, peak, dur);
+  o.connect(g); g.connect(master());
+  o.start(t0); o.stop(t0+dur+0.05);
+}
+function sndCrash(t0, dur, peak){
+  const c = actx();
+  const s = c.createBufferSource(); s.buffer = noiseBuf(); s.loop = true;
+  const f = c.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 5000;
+  const g = c.createGain(); envGain(g, t0, peak, dur);
+  s.connect(f); f.connect(g); g.connect(master());
+  s.start(t0); s.stop(t0+dur+0.05);
+}
+function sndKaboom(){
+  if(!sndOn) return;
+  const t0 = actx().currentTime;
+  tone(t0, 90, 0.8, 'sine', 0.9, 28);
+  playNoise(t0, 0.25, 250, 0.5);
+  sndCrash(t0, 1.4, 0.3);
+}
+function sndZuban(){
+  if(!sndOn) return;
+  const t0 = actx().currentTime;
+  tone(t0, 500, 0.45, 'sawtooth', 0.3, 60);
+  tone(t0+0.05, 70, 0.6, 'sine', 0.6, 30);
+}
+function sndDon(){
+  if(!sndOn) return;
+  const t0 = actx().currentTime;
+  tone(t0, 82, 0.55, 'sine', 0.7, 32);
+  playNoise(t0, 0.12, 180, 0.25);
+}
+const sndBtn = document.getElementById('snd-btn');
+function updSndBtn(){ sndBtn.textContent = sndOn ? '🔊' : '🔇'; }
+sndBtn.addEventListener('click', ()=>{
+  sndOn = !sndOn;
+  try{ localStorage.setItem('kokugo-sound', sndOn ? 'on' : 'off'); }catch(e){}
+  if(sndOn){ actx(); sndDon(); }
+  updSndBtn();
+});
+updSndBtn();
+
+// ---- デッキ（固定問題） ----
+const DECK = [
+{
+"c": "カタカナ",
+"q": "<span class=\"pic\">🔤</span>「らいおん」を カタカナで かくと？",
+"a": "ライオン",
+"alt": [
+"ライオソ",
+"レイオン",
+"ラーオン"
+]
+},
+{
+"c": "カタカナ",
+"q": "<span class=\"pic\">🔤</span>「ばなな」を カタカナで かくと？",
+"a": "バナナ",
+"alt": [
+"パナナ",
+"バサナ",
+"バナヤ"
+]
+},
+{
+"c": "カタカナ",
+"q": "<span class=\"pic\">🔤</span>「とまと」を カタカナで かくと？",
+"a": "トマト",
+"alt": [
+"ナマト",
+"トヌト",
+"トワト"
+]
+},
+{
+"c": "カタカナ",
+"q": "<span class=\"pic\">🔤</span>「ぴあの」を カタカナで かくと？",
+"a": "ピアノ",
+"alt": [
+"ビアノ",
+"ピアソ",
+"プアノ"
+]
+},
+{
+"c": "カタカナ",
+"q": "<span class=\"pic\">🔤</span>「めろん」を カタカナで かくと？",
+"a": "メロン",
+"alt": [
+"メロソ",
+"ヌロン",
+"メウン"
+]
+},
+{
+"c": "カタカナ",
+"q": "<span class=\"pic\">🔤</span>「ろぼっと」を カタカナで かくと？",
+"a": "ロボット",
+"alt": [
+"ロポット",
+"ロボシト",
+"ロホット"
+]
+},
+{
+"c": "カタカナ",
+"q": "<span class=\"pic\">🔤</span>「あいす」を カタカナで かくと？",
+"a": "アイス",
+"alt": [
+"アイヌ",
+"マイス",
+"アヌス"
+]
+},
+{
+"c": "カタカナ",
+"q": "<span class=\"pic\">🔤</span>「ぱんだ」を カタカナで かくと？",
+"a": "パンダ",
+"alt": [
+"バンダ",
+"パソダ",
+"パンタ"
+]
+},
+{
+"c": "カタカナ",
+"q": "<span class=\"pic\">🔤</span>「らじお」を カタカナで かくと？",
+"a": "ラジオ",
+"alt": [
+"ラヅオ",
+"ラジホ",
+"テジオ"
+]
+},
+{
+"c": "カタカナ",
+"q": "<span class=\"pic\">🔤</span>「けーき」を カタカナで かくと？",
+"a": "ケーキ",
+"alt": [
+"ケーそ",
+"ゲーキ",
+"クーキ"
+]
+},
+{
+"c": "はんたいことば",
+"q": "<span class=\"pic\">🔁</span>「おおきい」の はんたいは？",
+"a": "ちいさい",
+"alt": [
+"さむい",
+"くらい",
+"よわい"
+]
+},
+{
+"c": "はんたいことば",
+"q": "<span class=\"pic\">🔁</span>「たかい」の はんたいは？",
+"a": "ひくい",
+"alt": [
+"おそい",
+"かるい",
+"みじかい"
+]
+},
+{
+"c": "はんたいことば",
+"q": "<span class=\"pic\">🔁</span>「あつい」の はんたいは？",
+"a": "さむい",
+"alt": [
+"くらい",
+"よわい",
+"ふるい"
+]
+},
+{
+"c": "はんたいことば",
+"q": "<span class=\"pic\">🔁</span>「はやい」の はんたいは？",
+"a": "おそい",
+"alt": [
+"かるい",
+"みじかい",
+"せまい"
+]
+},
+{
+"c": "はんたいことば",
+"q": "<span class=\"pic\">🔁</span>「あかるい」の はんたいは？",
+"a": "くらい",
+"alt": [
+"よわい",
+"ふるい",
+"ちいさい"
+]
+},
+{
+"c": "はんたいことば",
+"q": "<span class=\"pic\">🔁</span>「おもい」の はんたいは？",
+"a": "かるい",
+"alt": [
+"みじかい",
+"せまい",
+"ひくい"
+]
+},
+{
+"c": "はんたいことば",
+"q": "<span class=\"pic\">🔁</span>「つよい」の はんたいは？",
+"a": "よわい",
+"alt": [
+"ふるい",
+"ちいさい",
+"さむい"
+]
+},
+{
+"c": "はんたいことば",
+"q": "<span class=\"pic\">🔁</span>「ながい」の はんたいは？",
+"a": "みじかい",
+"alt": [
+"せまい",
+"ひくい",
+"おそい"
+]
+},
+{
+"c": "はんたいことば",
+"q": "<span class=\"pic\">🔁</span>「あたらしい」の はんたいは？",
+"a": "ふるい",
+"alt": [
+"ちいさい",
+"さむい",
+"くらい"
+]
+},
+{
+"c": "はんたいことば",
+"q": "<span class=\"pic\">🔁</span>「ひろい」の はんたいは？",
+"a": "せまい",
+"alt": [
+"ひくい",
+"おそい",
+"かるい"
+]
+},
+{
+"c": "かぞえかた",
+"q": "<span class=\"pic\">🧮</span>いぬ 1… なんて かぞえる？",
+"a": "ぴき",
+"alt": [
+"さつ",
+"だい",
+"まい"
+]
+},
+{
+"c": "かぞえかた",
+"q": "<span class=\"pic\">🧮</span>ほん 1… なんて かぞえる？",
+"a": "さつ",
+"alt": [
+"ぴき",
+"だい",
+"こ"
+]
+},
+{
+"c": "かぞえかた",
+"q": "<span class=\"pic\">🧮</span>くるま 1… なんて かぞえる？",
+"a": "だい",
+"alt": [
+"さつ",
+"わ",
+"にん"
+]
+},
+{
+"c": "かぞえかた",
+"q": "<span class=\"pic\">🧮</span>たまご 1… なんて かぞえる？",
+"a": "こ",
+"alt": [
+"さつ",
+"わ",
+"だい"
+]
+},
+{
+"c": "かぞえかた",
+"q": "<span class=\"pic\">🧮</span>とり 1… なんて かぞえる？",
+"a": "わ",
+"alt": [
+"ぴき",
+"こ",
+"まい"
+]
+},
+{
+"c": "かぞえかた",
+"q": "<span class=\"pic\">🧮</span>ひと 1… なんて かぞえる？",
+"a": "にん",
+"alt": [
+"ぴき",
+"だい",
+"さつ"
+]
+},
+{
+"c": "かぞえかた",
+"q": "<span class=\"pic\">🧮</span>かみ 1… なんて かぞえる？",
+"a": "まい",
+"alt": [
+"こ",
+"さつ",
+"だい"
+]
+},
+{
+"c": "かぞえかた",
+"q": "<span class=\"pic\">🧮</span>えんぴつ 1… なんて かぞえる？",
+"a": "ほん",
+"alt": [
+"まい",
+"こ",
+"さつ"
+]
+},
+{
+"c": "かん字",
+"q": "<span class=\"pic\">✏️</span>「山」は なんて よむ？",
+"a": "やま",
+"alt": [
+"かわ",
+"ひ",
+"き"
+]
+},
+{
+"c": "かん字",
+"q": "<span class=\"pic\">✏️</span>「川」は なんて よむ？",
+"a": "かわ",
+"alt": [
+"やま",
+"つき",
+"みず"
+]
+},
+{
+"c": "かん字",
+"q": "<span class=\"pic\">✏️</span>「日」は なんて よむ？",
+"a": "ひ",
+"alt": [
+"つき",
+"やま",
+"かわ"
+]
+},
+{
+"c": "かん字",
+"q": "<span class=\"pic\">✏️</span>「月」は なんて よむ？",
+"a": "つき",
+"alt": [
+"ひ",
+"ほし",
+"やま"
+]
+},
+{
+"c": "かん字",
+"q": "<span class=\"pic\">✏️</span>「木」は なんて よむ？",
+"a": "き",
+"alt": [
+"やま",
+"はな",
+"かわ"
+]
+},
+{
+"c": "かん字",
+"q": "<span class=\"pic\">✏️</span>「水」は なんて よむ？",
+"a": "みず",
+"alt": [
+"ひ",
+"き",
+"つき"
+]
+},
+{
+"c": "かん字",
+"q": "<span class=\"pic\">✏️</span>「花」は なんて よむ？",
+"a": "はな",
+"alt": [
+"き",
+"やま",
+"かわ"
+]
+},
+{
+"c": "かん字",
+"q": "<span class=\"pic\">✏️</span>「犬」は なんて よむ？",
+"a": "いぬ",
+"alt": [
+"ねこ",
+"とり",
+"うま"
+]
+},
+{
+"c": "かん字",
+"q": "<span class=\"pic\">✏️</span>「空」は なんて よむ？",
+"a": "そら",
+"alt": [
+"うみ",
+"やま",
+"ほし"
+]
+},
+{
+"c": "かん字",
+"q": "<span class=\"pic\">✏️</span>「雨」は なんて よむ？",
+"a": "あめ",
+"alt": [
+"ゆき",
+"そら",
+"かぜ"
+]
+}
+];
+
+const $ = id => document.getElementById(id);
+let cat = 'all';
+let pool = [], idx = 0, qNo = 0, score = 0, streak = 0;
+let cur = null, locked = false;
+
+let againPool = [];
+try{
+  const s = localStorage.getItem('kokugo-again');
+  if(s) againPool = JSON.parse(s);
+}catch(e){}
+function saveAgain(){ try{ localStorage.setItem('kokugo-again', JSON.stringify(againPool.slice(0,60))); }catch(e){} }
+
+function buildPool(){
+  pool = DECK.map((_,i)=>i).filter(i => cat==='all' || DECK[i].c===cat);
+  for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  idx = 0;
+}
+
+function pick(){
+  if(againPool.length && Math.random() < 0.35){
+    const cand = againPool.filter(i => cat==='all' || DECK[i].c===cat);
+    if(cand.length) return {i:cand[Math.floor(Math.random()*cand.length)], again:true};
+  }
+  const i = pool[idx % pool.length];
+  idx++;
+  if(idx >= pool.length) buildPool();
+  return {i, again:false};
+}
+
+function ghMini(){ $('gh-mini').textContent = GOHOUBI.mini(); }
+
+function render(){
+  const p = pick();
+  cur = {...DECK[p.i], i:p.i, again:p.again};
+  locked = false; qNo++;
+  $('counter').textContent = 'もんだい ' + qNo;
+  $('score').innerHTML = 'せいかい ' + score + ' / ' + (qNo-1) +
+    (streak>=2 ? '　<span style="color:#f0857c;">🔥' + streak + 'れんぞく</span>' : '');
+  ghMini();
+  $('cat-badge').textContent = cur.c;
+  $('q-text').innerHTML = cur.q;
+  $('card-note').textContent = 'したの4つからえらんでね';
+  $('card').classList.toggle('is-again', cur.again);
+  const opts = [cur.a, ...cur.alt];
+  for(let i=opts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]]; }
+  const el = $('choices');
+  el.innerHTML = '';
+  opts.forEach(v=>{
+    const b = document.createElement('button');
+    b.textContent = v;
+    b.addEventListener('click', ()=>answer(b, v===cur.a));
+    el.appendChild(b);
+  });
+}
+
+function confetti(n){
+  for(let i=0;i<n;i++){
+    const s = document.createElement('span');
+    s.style.cssText = 'position:fixed;top:-16px;z-index:30;pointer-events:none;border-radius:2px;';
+    s.style.background = Math.random()<.65 ? 'var(--gold)' : 'var(--red)';
+    s.style.left = (Math.random()*100) + 'vw';
+    s.style.width = (5+Math.random()*6) + 'px';
+    s.style.height = (10+Math.random()*12) + 'px';
+    s.style.animation = 'ghFall ' + (1.2+Math.random()*1.3) + 's linear ' + (Math.random()*.3) + 's forwards';
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(), 3200);
+  }
+}
+
+function answer(btn, ok){
+  if(locked) return;
+  locked = true;
+  [...$('choices').children].forEach(b=>{
+    b.disabled = true;
+    if(b.textContent === cur.a) b.classList.add('correct');
+  });
+  if(ok){
+    score++; streak++;
+    sndKaboom();
+    $('card').classList.add('flash');
+    setTimeout(()=>$('card').classList.remove('flash'), 550);
+    $('card-note').textContent = streak>=3 ? '🔥 ' + streak + 'れんぞくせいかい！' : 'せいかい！🎉';
+    if(streak>=3){ confetti(streak>=5 ? 26 : 14); sndDon(); }
+    const ai = againPool.indexOf(cur.i);
+    if(ai>=0){ againPool.splice(ai,1); saveAgain(); }
+    const shown = GOHOUBI.award(()=>{ ghMini(); render(); }, 800);
+    ghMini();
+    if(!shown) setTimeout(render, 950);
+  }else{
+    streak = 0;
+    GOHOUBI.miss(); ghMini();
+    sndZuban();
+    if(btn) btn.classList.add('wrong');
+    $('card').classList.add('shake');
+    setTimeout(()=>$('card').classList.remove('shake'), 500);
+    $('card-note').innerHTML = 'こたえは <span class="ans">' + cur.a + '</span>！⭐は0から。あとでもういっかい出すよ💪';
+    if(!againPool.includes(cur.i)){ againPool.unshift(cur.i); saveAgain(); }
+    const b = document.createElement('button');
+    b.className = 'next-q';
+    b.textContent = 'つぎのもんだいへ →';
+    b.addEventListener('click', render);
+    $('choices').appendChild(b);
+  }
+}
+
+document.querySelectorAll('#cat-filters button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    cat = b.dataset.c;
+    document.querySelectorAll('#cat-filters button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    buildPool(); render();
+  });
+});
+
+buildPool();
+render();
+</script>
+</body>
+</html>

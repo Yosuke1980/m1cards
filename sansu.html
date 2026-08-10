@@ -193,7 +193,13 @@ table.kuku td.diag{background:rgba(217,164,65,.22);color:var(--gold);font-weight
     <p class="eyebrow">SANSU CARD 1-20</p>
     <h1>さんすうカード</h1>
   </div>
-  <a href="index.html">🎤 M-1カードへ</a>
+  <span style="display:flex;gap:6px;flex-wrap:wrap;">
+    <a href="eigo.html">🔤 えいご</a>
+    <a href="kokugo.html">✏️ こくご</a>
+    <a href="joushiki.html">🌏 じょうしき</a>
+    <a href="hakken.html">🔍 はっけん</a>
+    <a href="index.html">🎤 M-1</a>
+  </span>
 </header>
 
 <div class="mode-toggle">
@@ -242,9 +248,9 @@ table.kuku td.diag{background:rgba(217,164,65,.22);color:var(--gold);font-weight
 
 <div class="reward">
   <div class="rw-panel">
-    <p class="rw-title">⭐ スタンプカード（せいかい1もん＝1こ）</p>
+    <p class="rw-title">⭐ スタンプカード（れんぞくせいかいで たまる）</p>
     <div class="stamp-row" id="stamp-row"></div>
-    <p class="rw-note">10こ たまると メダル1こ！</p>
+    <p class="rw-note">れんぞくで10もん せいかいすると メダル1こ！<br>まちがえると ⭐は0に もどるよ（メダルは へらない）</p>
   </div>
   <div class="rw-panel">
     <p class="rw-title">🏅 メダルだな</p>
@@ -489,11 +495,12 @@ function answer(btn, ok){
     if(!shown) setTimeout(render, 950);
   }else{
     streak = 0;
+    GOHOUBI.miss(); rwMini();
     sndZuban();
     if(btn) btn.classList.add('wrong');
     $('card').classList.add('shake');
     setTimeout(()=>$('card').classList.remove('shake'), 500);
-    $('card-note').innerHTML = 'こたえは <span class="ans">' + cur.ans + '</span>！あとでもういっかい出すよ💪';
+    $('card-note').innerHTML = 'こたえは <span class="ans">' + cur.ans + '</span>！⭐は0から。あとでもういっかい出すよ💪';
     if(!againPool.includes(k)){ againPool.unshift(k); saveAgain(); }
     const b = document.createElement('button');
     b.className = 'next-q';

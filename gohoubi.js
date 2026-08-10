@@ -54,7 +54,7 @@
       '<div class="gh-msg">'+(isTicket ? 'ごほうびけん ゲット！' : 'メダル ゲット！')+'</div>'+
       '<div class="gh-sub">'+(isTicket
         ? 'おうちのひとに みせて<br>ごほうびと こうかんしよう！'
-        : 'スタンプ10こ たっせい！<br>メダル3こで ごほうびけんだよ')+'</div>'+
+        : 'れんぞくせいかい 10もん たっせい！<br>メダル3こで ごほうびけんだよ')+'</div>'+
       '<button>つぎへ すすむ →</button>'+
       '</div>';
     document.body.appendChild(o);
@@ -72,6 +72,8 @@
     state(){ return rw; },
     save,
     mini(){ return '🏅' + rw.m + ' ⭐' + rw.s + '/10'; },
+    // まちがえたらスタンプは0に戻る（れんぞくせいかい10もん＝メダルのルール。メダル・けんは減らない）
+    miss(){ if(rw.s > 0){ rw.s = 0; save(); } },
     // スタンプ1こ加算。メダル/券が出たら演出を表示してtrueを返す（閉じたらonClose）。
     // 演出なしならfalse（呼び出し側が自分のタイミングで次へ進む）。
     award(onClose, delayMs){
