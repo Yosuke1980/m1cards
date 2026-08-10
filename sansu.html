@@ -108,6 +108,53 @@ header a{font-size:12px;color:var(--text-dim);text-decoration:none;border:1px so
 .tables{display:none;width:100%;max-width:740px;}
 body.hyo-mode .tables{display:block;}
 body.hyo-mode .card,body.hyo-mode .choices,body.hyo-mode .filters,body.hyo-mode .status{display:none;}
+.reward{display:none;width:100%;max-width:740px;}
+body.reward-mode .reward{display:block;}
+body.reward-mode .card,body.reward-mode .choices,body.reward-mode .filters,body.reward-mode .status{display:none;}
+.rw-panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:14px;
+  box-shadow:0 0 0 1px rgba(217,164,65,.28);
+}
+.rw-title{font-size:16px;font-weight:900;color:var(--gold);margin-bottom:14px;}
+.stamp-row{display:flex;gap:9px;flex-wrap:wrap;}
+.stamp{
+  width:44px;height:44px;border-radius:50%;border:2px dashed var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--line);
+}
+.stamp.on{border:2px solid var(--gold);background:rgba(217,164,65,.18);color:var(--gold);}
+.rw-note{font-size:13px;color:var(--text-dim);margin-top:12px;line-height:1.9;}
+.medal-shelf{font-size:36px;line-height:1.6;word-break:break-all;}
+.medal-count{font-size:15px;font-weight:700;margin-top:6px;}
+.ticket{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:linear-gradient(90deg,rgba(217,164,65,.16),transparent);
+  border:1px dashed var(--gold);border-radius:10px;padding:14px 16px;margin-bottom:10px;
+  font-size:16px;font-weight:900;
+}
+.ticket.used{opacity:.4;border-color:var(--line);background:none;}
+.ticket button{
+  font-family:inherit;font-size:13px;font-weight:700;padding:9px 16px;border-radius:8px;
+  border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;
+}
+.ticket.used button{border-color:var(--line);color:var(--text-dim);cursor:default;}
+.reward-overlay{
+  position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;
+  background:rgba(17,16,19,.93);padding:24px;
+}
+.rw-box{
+  background:var(--panel);border:2px solid var(--gold);border-radius:16px;
+  padding:38px 30px;text-align:center;max-width:420px;
+  box-shadow:0 0 60px rgba(217,164,65,.5);
+  animation:rwPop .45s cubic-bezier(.2,1.4,.5,1);
+}
+@keyframes rwPop{from{transform:scale(.5);opacity:0;}to{transform:scale(1);opacity:1;}}
+.rw-box .big{font-size:64px;line-height:1.2;}
+.rw-box .msg{font-size:20px;font-weight:900;color:var(--gold);margin:14px 0 6px;}
+.rw-box .sub{font-size:14px;color:var(--text-dim);line-height:1.9;}
+.rw-box button{
+  margin-top:18px;font-family:inherit;font-size:15px;font-weight:700;padding:12px 30px;
+  border-radius:999px;border:none;background:var(--red);color:#fff;cursor:pointer;
+}
 .tbl-panel{
   background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px;
   box-shadow:0 0 0 1px rgba(217,164,65,.28);overflow-x:auto;
@@ -152,6 +199,7 @@ table.kuku td.diag{background:rgba(217,164,65,.22);color:var(--gold);font-weight
 <div class="mode-toggle">
   <button data-m="quiz" class="active">クイズ 🔥</button>
   <button data-m="hyo">ひょう 📖</button>
+  <button data-m="reward">ごほうび 🏅</button>
 </div>
 
 <div class="filters" id="cat-filters">
@@ -170,7 +218,7 @@ table.kuku td.diag{background:rgba(217,164,65,.22);color:var(--gold);font-weight
 <div class="status">
   <span id="counter">もんだい 1</span>
   <span class="score" id="score"></span>
-  <button id="snd-btn" class="snd" aria-label="おとのオンオフ">🔊</button>
+  <span><span id="rw-mini" style="color:var(--gold);font-weight:700;margin-right:8px;"></span><button id="snd-btn" class="snd" aria-label="おとのオンオフ">🔊</button></span>
 </div>
 
 <div class="card" id="card">
@@ -189,6 +237,25 @@ table.kuku td.diag{background:rgba(217,164,65,.22);color:var(--gold);font-weight
   <div class="tbl-panel">
     <p class="tbl-title">📖 にじょうのひょう（おなじ数どうしのかけ算）</p>
     <div class="sq-grid" id="sq-table"></div>
+  </div>
+</div>
+
+<div class="reward">
+  <div class="rw-panel">
+    <p class="rw-title">⭐ スタンプカード（せいかい1もん＝1こ）</p>
+    <div class="stamp-row" id="stamp-row"></div>
+    <p class="rw-note">10こ たまると メダル1こ！</p>
+  </div>
+  <div class="rw-panel">
+    <p class="rw-title">🏅 メダルだな</p>
+    <div class="medal-shelf" id="medal-shelf"></div>
+    <p class="medal-count" id="medal-count"></p>
+    <p class="rw-note">メダル3こで「ごほうびけん」1まい！</p>
+  </div>
+  <div class="rw-panel">
+    <p class="rw-title">🎫 ごほうびけん</p>
+    <div id="ticket-list"></div>
+    <p class="rw-note">おうちのひとに みせて、ごほうびと こうかんしよう！<br>（なにと こうかんできるかは おうちのひとが きめるよ）</p>
   </div>
 </div>
 
@@ -416,7 +483,10 @@ function answer(btn, ok){
     // まちがいリストに入っていた問題に正解したら卒業
     const i = againPool.indexOf(k);
     if(i>=0){ againPool.splice(i,1); saveAgain(); }
-    setTimeout(render, 950);
+    const got = addStamp();
+    if(got.gotTicket){ setTimeout(()=>rewardOverlay('ticket'), 800); }
+    else if(got.gotMedal){ setTimeout(()=>rewardOverlay('medal'), 800); }
+    else{ setTimeout(render, 950); }
   }else{
     streak = 0;
     sndZuban();
@@ -455,8 +525,81 @@ document.querySelectorAll('.mode-toggle button').forEach(b=>{
     document.querySelectorAll('.mode-toggle button').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
     document.body.classList.toggle('hyo-mode', b.dataset.m==='hyo');
+    document.body.classList.toggle('reward-mode', b.dataset.m==='reward');
+    if(b.dataset.m==='reward') renderReward();
   });
 });
+
+// ---- ごほうびシステム（正解10問=メダル1こ、メダル3こ=ごほうびけん1まい） ----
+let rw = {s:0, m:0, t:[]};
+try{
+  const s = localStorage.getItem('sansu-reward');
+  if(s) rw = JSON.parse(s);
+}catch(e){}
+function saveRw(){ try{ localStorage.setItem('sansu-reward', JSON.stringify(rw)); }catch(e){} }
+
+function rwMini(){
+  $('rw-mini').textContent = '🏅' + rw.m + ' ⭐' + rw.s + '/10';
+}
+function addStamp(){
+  rw.s++;
+  let gotMedal = false, gotTicket = false;
+  if(rw.s >= 10){
+    rw.s = 0; rw.m++;
+    gotMedal = true;
+    if(rw.m % 3 === 0){
+      rw.t.push({id:Date.now(), u:false});
+      gotTicket = true;
+    }
+  }
+  saveRw(); rwMini();
+  return {gotMedal, gotTicket};
+}
+function rewardOverlay(kind){
+  const o = document.createElement('div');
+  o.className = 'reward-overlay';
+  const isTicket = kind === 'ticket';
+  o.innerHTML = '<div class="rw-box">'+
+    '<div class="big">'+(isTicket ? '🎫' : '🏅')+'</div>'+
+    '<div class="msg">'+(isTicket ? 'ごほうびけん ゲット！' : 'メダル ゲット！')+'</div>'+
+    '<div class="sub">'+(isTicket
+      ? 'おうちのひとに みせて<br>ごほうびと こうかんしよう！'
+      : 'せいかい10もん たっせい！<br>メダル3こで ごほうびけんだよ')+'</div>'+
+    '<button>つぎへ すすむ →</button>'+
+    '</div>';
+  document.body.appendChild(o);
+  confetti(isTicket ? 40 : 22);
+  sndKaboom(); setTimeout(sndDon, 400); if(isTicket) setTimeout(sndKaboom, 700);
+  o.querySelector('button').addEventListener('click', ()=>{ o.remove(); render(); });
+}
+function renderReward(){
+  let sr = '';
+  for(let i=0;i<10;i++) sr += '<div class="stamp'+(i<rw.s?' on':'')+'">'+(i<rw.s?'⭐':'')+'</div>';
+  $('stamp-row').innerHTML = sr;
+  $('medal-shelf').textContent = rw.m ? '🏅'.repeat(Math.min(rw.m, 30)) : 'まだないよ。クイズで あつめよう！';
+  const next = 3 - (rw.m % 3);
+  $('medal-count').textContent = 'メダル ' + rw.m + ' こ' + (rw.m ? '（あと' + next + 'こで ごほうびけん！）' : '');
+  const tl = $('ticket-list');
+  if(!rw.t.length){ tl.innerHTML = '<p class="rw-note">まだないよ。メダル3こで 1まい もらえるよ！</p>'; }
+  else{
+    tl.innerHTML = '';
+    [...rw.t].reverse().forEach(tk=>{
+      const d = document.createElement('div');
+      d.className = 'ticket' + (tk.u ? ' used' : '');
+      d.innerHTML = '<span>🎫 ごほうびけん</span>';
+      const b = document.createElement('button');
+      b.textContent = tk.u ? 'つかったよ' : 'つかう';
+      if(!tk.u) b.addEventListener('click', ()=>{
+        if(confirm('ごほうびと こうかんした？（おうちのひとと いっしょにおしてね）')){
+          tk.u = true; saveRw(); renderReward();
+        }
+      });
+      d.appendChild(b);
+      tl.appendChild(d);
+    });
+  }
+}
+rwMini();
 
 // ---- ひょう（九九表・二乗表） ----
 (function buildTables(){
