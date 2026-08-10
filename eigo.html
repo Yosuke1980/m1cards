@@ -251,14 +251,30 @@ if('speechSynthesis' in window){
   pickVoice();
   speechSynthesis.onvoiceschanged = pickVoice;
 }
-function speak(text){
+let enBank = {};
+fetch('audio/en/manifest.json').then(r=>r.json()).then(m=>{ enBank = m; }).catch(()=>{});
+let curAudio = null;
+function stopAudio(){
+  if(curAudio){ curAudio.pause(); curAudio = null; }
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+}
+function speakTTS(text){
   if(!('speechSynthesis' in window) || !text) return;
-  speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'en-US';
   if(enVoice) u.voice = enVoice;
   u.rate = 0.8;
   speechSynthesis.speak(u);
+}
+function speak(text){
+  if(!text) return;
+  stopAudio();
+  if(enBank[text]){
+    curAudio = new Audio('audio/en/' + enBank[text]);
+    curAudio.play().catch(()=>speakTTS(text));
+    return;
+  }
+  speakTTS(text);
 }
 document.getElementById('card').addEventListener('click', ()=>{
   if(cur && cur.en) speak(cur.en);
@@ -1194,7 +1210,20 @@ function render(){
   el.innerHTML = '';
   opts.forEach(v=>{
     const b = document.createElement('button');
-    b.textContent = v;
+    b.dataset.v = v;
+    if(/^[A-Za-z0-9 .,'!?\u25CB-]+$/.test(v)){
+      const sp = document.createElement('span');
+      sp.textContent = '\uD83D\uDD0A ';
+      sp.style.cssText = 'opacity:.85;';
+      sp.addEventListener('click', ev=>{
+        ev.stopPropagation();
+        speak(v.replace(/\u25CB\u25CB/g, '').trim());
+      });
+      b.appendChild(sp);
+      b.appendChild(document.createTextNode(v));
+    }else{
+      b.textContent = v;
+    }
     b.addEventListener('click', ()=>answer(b, v===cur.a));
     el.appendChild(b);
   });
@@ -1219,7 +1248,7 @@ function answer(btn, ok){
   locked = true;
   [...$('choices').children].forEach(b=>{
     b.disabled = true;
-    if(b.textContent === cur.a) b.classList.add('correct');
+    if((b.dataset.v || b.textContent) === cur.a) b.classList.add('correct');
   });
   if(ok){
     score++; streak++;

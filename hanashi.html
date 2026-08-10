@@ -207,15 +207,31 @@ if('speechSynthesis' in window){
   pickVoice();
   speechSynthesis.onvoiceschanged = pickVoice;
 }
-function speak(text, onEnd){
+let jaBank = {};
+fetch('audio/ja/manifest.json').then(r=>r.json()).then(m=>{ jaBank = m; }).catch(()=>{});
+let curAudio = null;
+function stopAudio(){
+  if(curAudio){ curAudio.onended = null; curAudio.pause(); curAudio = null; }
+  if('speechSynthesis' in window) speechSynthesis.cancel();
+}
+function speakTTS(text, onEnd){
   if(!('speechSynthesis' in window)){ if(onEnd) onEnd(); return; }
-  speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'ja-JP';
   if(jaVoice) u.voice = jaVoice;
   u.rate = 0.9;
   if(onEnd) u.onend = onEnd;
   speechSynthesis.speak(u);
+}
+function speak(text, onEnd){
+  stopAudio();
+  if(jaBank[text]){
+    curAudio = new Audio('audio/ja/' + jaBank[text]);
+    if(onEnd) curAudio.onended = onEnd;
+    curAudio.play().catch(()=>{ speakTTS(text, onEnd); });
+    return;
+  }
+  speakTTS(text, onEnd);
 }
 
 // ---- すすめかた ----
