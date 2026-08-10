@@ -259,6 +259,7 @@ table.kuku td.diag{background:rgba(217,164,65,.22);color:var(--gold);font-weight
   </div>
 </div>
 
+<script src="gohoubi.js"></script>
 <script>
 // ---- サウンド（M-1カードと同じ自作効果音エンジン・外部音源なし） ----
 let sndOn = true;
@@ -483,10 +484,9 @@ function answer(btn, ok){
     // まちがいリストに入っていた問題に正解したら卒業
     const i = againPool.indexOf(k);
     if(i>=0){ againPool.splice(i,1); saveAgain(); }
-    const got = addStamp();
-    if(got.gotTicket){ setTimeout(()=>rewardOverlay('ticket'), 800); }
-    else if(got.gotMedal){ setTimeout(()=>rewardOverlay('medal'), 800); }
-    else{ setTimeout(render, 950); }
+    const shown = GOHOUBI.award(()=>{ rwMini(); render(); }, 800);
+    rwMini();
+    if(!shown) setTimeout(render, 950);
   }else{
     streak = 0;
     sndZuban();
@@ -530,49 +530,10 @@ document.querySelectorAll('.mode-toggle button').forEach(b=>{
   });
 });
 
-// ---- ごほうびシステム（正解10問=メダル1こ、メダル3こ=ごほうびけん1まい） ----
-let rw = {s:0, m:0, t:[]};
-try{
-  const s = localStorage.getItem('sansu-reward');
-  if(s) rw = JSON.parse(s);
-}catch(e){}
-function saveRw(){ try{ localStorage.setItem('sansu-reward', JSON.stringify(rw)); }catch(e){} }
-
-function rwMini(){
-  $('rw-mini').textContent = '🏅' + rw.m + ' ⭐' + rw.s + '/10';
-}
-function addStamp(){
-  rw.s++;
-  let gotMedal = false, gotTicket = false;
-  if(rw.s >= 10){
-    rw.s = 0; rw.m++;
-    gotMedal = true;
-    if(rw.m % 3 === 0){
-      rw.t.push({id:Date.now(), u:false});
-      gotTicket = true;
-    }
-  }
-  saveRw(); rwMini();
-  return {gotMedal, gotTicket};
-}
-function rewardOverlay(kind){
-  const o = document.createElement('div');
-  o.className = 'reward-overlay';
-  const isTicket = kind === 'ticket';
-  o.innerHTML = '<div class="rw-box">'+
-    '<div class="big">'+(isTicket ? '🎫' : '🏅')+'</div>'+
-    '<div class="msg">'+(isTicket ? 'ごほうびけん ゲット！' : 'メダル ゲット！')+'</div>'+
-    '<div class="sub">'+(isTicket
-      ? 'おうちのひとに みせて<br>ごほうびと こうかんしよう！'
-      : 'せいかい10もん たっせい！<br>メダル3こで ごほうびけんだよ')+'</div>'+
-    '<button>つぎへ すすむ →</button>'+
-    '</div>';
-  document.body.appendChild(o);
-  confetti(isTicket ? 40 : 22);
-  sndKaboom(); setTimeout(sndDon, 400); if(isTicket) setTimeout(sndKaboom, 700);
-  o.querySelector('button').addEventListener('click', ()=>{ o.remove(); render(); });
-}
+// ---- ごほうび（共通ライブラリ gohoubi.js に接続） ----
+function rwMini(){ $('rw-mini').textContent = GOHOUBI.mini(); }
 function renderReward(){
+  const rw = GOHOUBI.state();
   let sr = '';
   for(let i=0;i<10;i++) sr += '<div class="stamp'+(i<rw.s?' on':'')+'">'+(i<rw.s?'⭐':'')+'</div>';
   $('stamp-row').innerHTML = sr;
@@ -591,7 +552,7 @@ function renderReward(){
       b.textContent = tk.u ? 'つかったよ' : 'つかう';
       if(!tk.u) b.addEventListener('click', ()=>{
         if(confirm('ごほうびと こうかんした？（おうちのひとと いっしょにおしてね）')){
-          tk.u = true; saveRw(); renderReward();
+          tk.u = true; GOHOUBI.save(); renderReward();
         }
       });
       d.appendChild(b);
@@ -600,6 +561,10 @@ function renderReward(){
   }
 }
 rwMini();
+if(location.hash === '#gohoubi'){
+  const b = document.querySelector('.mode-toggle button[data-m="reward"]');
+  if(b) b.click();
+}
 
 // ---- ひょう（九九表・二乗表） ----
 (function buildTables(){
