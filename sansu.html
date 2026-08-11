@@ -250,7 +250,7 @@ table.kuku td.diag{background:rgba(217,164,65,.22);color:var(--gold);font-weight
   <div class="rw-panel">
     <p class="rw-title">⭐ スタンプカード（れんぞくせいかいで たまる）</p>
     <div class="stamp-row" id="stamp-row"></div>
-    <p class="rw-note">れんぞくで10もん せいかいすると メダル1こ！<br>まちがえると ⭐は0に もどるよ（メダルは へらない）</p>
+    <p class="rw-note">⭐が10こ たまると メダル1こ！<br>まちがえると ⭐は1こ へるよ（メダルは へらない）</p>
     <p class="rw-note" id="balance-note"></p>
   </div>
   <div class="rw-panel">
@@ -502,7 +502,7 @@ function answer(btn, ok){
     if(btn) btn.classList.add('wrong');
     $('card').classList.add('shake');
     setTimeout(()=>$('card').classList.remove('shake'), 500);
-    $('card-note').innerHTML = 'こたえは <span class="ans">' + cur.ans + '</span>！⭐は0から。あとでもういっかい出すよ💪';
+    $('card-note').innerHTML = 'こたえは <span class="ans">' + cur.ans + '</span>！⭐が1こ へったよ。あとでもういっかい出すね💪';
     if(!againPool.includes(k)){ againPool.unshift(k); saveAgain(); }
     const b = document.createElement('button');
     b.className = 'next-q';
@@ -550,7 +550,7 @@ function renderReward(){
   const subj = rw.subj || {};
   const parts = Object.keys(subj).map(k=>(names[k]||k)+' '+subj[k]+'こ');
   const bal = document.getElementById('balance-note');
-  if(bal) bal.innerHTML = 'ひとつの きょうかで ためられるのは <b style="color:var(--gold);">4こまで</b>。いろんな きょうかを やろう！' + (parts.length ? '<br>いまのカード: ' + parts.join('・') : '');
+  if(bal) bal.innerHTML = parts.length ? 'いまのカード: ' + parts.join('・') : '';
   $('medal-shelf').textContent = rw.m ? '🏅'.repeat(Math.min(rw.m, 30)) : 'まだないよ。クイズで あつめよう！';
   const next = 3 - (rw.m % 3);
   $('medal-count').textContent = 'メダル ' + rw.m + ' こ' + (rw.m ? '（あと' + next + 'こで ごほうびけん！）' : '');

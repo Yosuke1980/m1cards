@@ -744,7 +744,7 @@ function answer(btn, ok){
     if(btn) btn.classList.add('wrong');
     $('card').classList.add('shake');
     setTimeout(()=>$('card').classList.remove('shake'), 500);
-    $('card-note').innerHTML = 'こたえは <span class="ans">' + cur.a + '</span>！⭐は0から。あとでもういっかい出すよ💪';
+    $('card-note').innerHTML = 'こたえは <span class="ans">' + cur.a + '</span>！⭐が1こ へったよ。あとでもういっかい出すね💪';
     if(!againPool.includes(cur.i)){ againPool.unshift(cur.i); saveAgain(); }
     const b = document.createElement('button');
     b.className = 'next-q';

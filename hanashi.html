@@ -354,7 +354,7 @@ function answer(btn, ok){
     if(btn) btn.classList.add('wrong');
     $('card').classList.add('shake');
     setTimeout(()=>$('card').classList.remove('shake'), 500);
-    $('card-note').innerHTML = 'こたえは <span class="ans">' + q.a + '</span>！⭐は0から💪';
+    $('card-note').innerHTML = 'こたえは <span class="ans">' + q.a + '</span>！⭐が1こ へったよ💪';
     const b = document.createElement('button');
     b.className = 'next-q';
     b.textContent = 'つぎへ →';

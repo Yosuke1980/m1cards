@@ -84,11 +84,11 @@
     state(){ return rw; },
     save,
     mini(){ return '🏅' + rw.m + ' ⭐' + rw.s + '/10'; },
-    // まちがえたらスタンプは0に戻る（れんぞくせいかい10もん＝メダルのルール。メダル・けんは減らない）
-    miss(){ if(rw.s > 0 || (rw.subj && Object.keys(rw.subj).length)){ rw.s = 0; rw.subj = {}; save(); } },
-    // スタンプ1こ加算（教科バランス制: 1枚のカードにつき同一教科は4こまで）。
+    // まちがえたら⭐が1こ減るだけ（連続でなくてOK・0未満にはならない。メダル/けんは減らない）
+    miss(){ if(rw.s > 0){ rw.s--; save(); } },
+    // スタンプ1こ加算（教科バランス制: 1枚のカードにつき同一教科の上限。10=実質制限なし）。
     // 戻り値 {stamped, capped, shown}。shown=演出表示中（閉じたらonClose）。
-    SUBJECT_CAP: 4,
+    SUBJECT_CAP: 10,
     award(onClose, delayMs, subject){
       subject = subject || 'etc';
       if(!rw.subj) rw.subj = {};
@@ -124,9 +124,8 @@
       const next = 3 - (rw.m % 3);
       let h = '<div class="rw-panel"><p class="rw-title">⭐ スタンプカード（れんぞくせいかいで たまる）</p>'+
         '<div class="stamp-row">'+sr+'</div>'+
-        '<p class="rw-note">れんぞくで10もん せいかいすると メダル1こ！<br>まちがえると ⭐は0に もどるよ（メダルは へらない）</p>'+
-        '<p class="rw-note">ひとつの きょうかで ためられるのは <b style="color:#d9a441;">4こまで</b>。いろんな きょうかを やろう！'+
-        (parts.length ? '<br>いまのカード: '+parts.join('・') : '')+'</p></div>';
+        '<p class="rw-note">⭐が10こ たまると メダル1こ！<br>まちがえると ⭐は1こ へるよ（メダルは へらない）</p>'+
+        (parts.length ? '<p class="rw-note">いまのカード: '+parts.join('・')+'</p>' : '')+'</div>';
       h += '<div class="rw-panel"><p class="rw-title">🏅 メダルだな</p>'+
         '<div class="medal-shelf">'+(rw.m ? '🏅'.repeat(Math.min(rw.m,30)) : 'まだないよ。クイズで あつめよう！')+'</div>'+
         '<p class="medal-count">メダル '+rw.m+' こ'+(rw.m ? '（あと'+next+'こで ごほうびけん！）' : '')+'</p>'+
