@@ -237,9 +237,10 @@ function stopAudio(){
   if(curAudio){ curAudio.onended = null; curAudio.pause(); curAudio = null; }
   if('speechSynthesis' in window) speechSynthesis.cancel();
 }
+function readAloud(t){ return t.replace(/M-1/g, 'エムワン'); }  // 「えむいち」と読まれるのを防ぐ
 function speakTTS(text, onEnd){
   if(!('speechSynthesis' in window)){ if(onEnd) onEnd(); return; }
-  const u = new SpeechSynthesisUtterance(text);
+  const u = new SpeechSynthesisUtterance(readAloud(text));
   u.lang = 'ja-JP';
   if(jaVoice) u.voice = jaVoice;
   u.rate = 0.9;
