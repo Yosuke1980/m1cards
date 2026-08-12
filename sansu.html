@@ -86,11 +86,31 @@ h1{font-size:24px;font-weight:900;border-left:6px solid var(--red);padding-left:
 .q-text small{font-size:26px;color:var(--text-dim);}
 .card-note{font-size:13px;color:var(--text-dim);margin-top:14px;line-height:1.8;}
 .card-note .ans{color:var(--gold);font-weight:900;font-size:20px;}
+.hint-btn{
+  font-family:inherit;font-size:13px;font-weight:700;padding:8px 18px;border-radius:999px;
+  border:1px dashed var(--gold);background:transparent;color:var(--gold);cursor:pointer;margin-top:12px;
+}
+.help-box{
+  margin-top:14px;padding:12px 14px;border-radius:10px;
+  background:rgba(217,164,65,.10);border:1px solid rgba(217,164,65,.35);
+  font-size:15px;line-height:2;color:var(--text);text-align:left;max-width:520px;
+}
+.help-box b{color:var(--gold);}
 .again-tag{
   position:absolute;top:12px;left:14px;font-size:12px;font-weight:700;color:#f0857c;
   border:1px solid #e2483d;border-radius:4px;padding:3px 10px;display:none;
 }
-.card.is-again .again-tag{display:block;}
+.card.is-again .hint-btn{
+  font-family:inherit;font-size:13px;font-weight:700;padding:8px 18px;border-radius:999px;
+  border:1px dashed var(--gold);background:transparent;color:var(--gold);cursor:pointer;margin-top:12px;
+}
+.help-box{
+  margin-top:14px;padding:12px 14px;border-radius:10px;
+  background:rgba(217,164,65,.10);border:1px solid rgba(217,164,65,.35);
+  font-size:15px;line-height:2;color:var(--text);text-align:left;max-width:520px;
+}
+.help-box b{color:var(--gold);}
+.again-tag{display:block;}
 .choices{
   width:100%;max-width:740px;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;
 }
@@ -233,6 +253,8 @@ table.kuku td.diag{background:rgba(217,164,65,.22);color:var(--gold);font-weight
   <span class="again-tag">💪 もういっかい</span>
   <p class="q-text" id="q-text"></p>
   <p class="card-note" id="card-note">したの4つからえらんでね</p>
+  <button class="hint-btn" id="hint-btn">💡 ヒント</button>
+  <div class="help-box" id="help-box" style="display:none;"></div>
 </div>
 
 <div class="choices" id="choices"></div>
@@ -426,6 +448,65 @@ function genQuestion(){
   return build(op, a, b, false);
 }
 
+
+// ---- ヒントと解説（2けたの計算を「10のかたまり」で考える練習） ----
+function tens(n){ return Math.floor(n/10)*10; }
+function ones(n){ return n%10; }
+function makeHelp(op, a, b, ans){
+  if(op==='add'){
+    if(a<10 && b<10){
+      const need = 10 - a;
+      if(b > need && need > 0) return {
+        h:'まず 10を つくろう。'+a+'は あと <b>'+need+'</b>で 10だよ',
+        e:b+'を '+need+'と '+(b-need)+'に わける<br>'+a+'＋'+need+'＝<b>10</b><br>10＋'+(b-need)+'＝<b>'+ans+'</b>'
+      };
+      return {h:'ゆびや ブロックで かぞえても いいよ', e:a+'から '+b+'こ すすむと <b>'+ans+'</b>'};
+    }
+    return {
+      h:'10のくらいと 1のくらいを べつべつに たしてみよう',
+      e:'10のくらい： '+tens(a)+'＋'+tens(b)+'＝'+(tens(a)+tens(b))+'<br>'+
+        '1のくらい： '+ones(a)+'＋'+ones(b)+'＝'+(ones(a)+ones(b))+'<br>'+
+        'あわせて '+(tens(a)+tens(b))+'＋'+(ones(a)+ones(b))+'＝<b>'+ans+'</b>'
+    };
+  }
+  if(op==='sub'){
+    if(a < 10) return {h:'ゆびで かぞえられるよ', e:a+'から '+b+'こ もどると <b>'+ans+'</b>'};
+    if(a<=20 && b<10){
+      const rest = a - 10;                       // 10といくつ に分ける（教科書の減加法）
+      if(b <= rest && rest > 0 && rest < 10) return {
+        h:'1のくらいだけ ひけば いいよ',
+        e:rest+'－'+b+'＝'+(rest-b)+'<br>10＋'+(rest-b)+'＝<b>'+ans+'</b>'
+      };
+      return {
+        h:a+'を <b>10</b>と <b>'+rest+'</b>に わけよう',
+        e:'10－'+b+'＝'+(10-b)+'<br>'+(10-b)+'＋'+rest+'＝<b>'+ans+'</b>'
+      };
+    }
+    return {
+      h:'ひくかずを 10のかたまりと ばらに わけよう',
+      e:'まず '+a+'－'+tens(b)+'＝'+(a-tens(b))+'<br>'+
+        'つぎに '+(a-tens(b))+'－'+ones(b)+'＝<b>'+ans+'</b>'
+    };
+  }
+  if(op==='mul' || op==='sq'){
+    if(a<10 && b<10) return {h:'九九だよ。'+a+'の だん を おもいだそう', e:a+'×'+b+'＝<b>'+ans+'</b>'};
+    const big = a >= b ? a : b, sml = a >= b ? b : a;
+    return {
+      h:big+'を 10と '+ones(big)+'に わけて かけよう',
+      e:'10×'+sml+'＝'+(10*sml)+'<br>'+ones(big)+'×'+sml+'＝'+(ones(big)*sml)+'<br>'+
+        'たすと '+(10*sml)+'＋'+(ones(big)*sml)+'＝<b>'+ans+'</b>'
+    };
+  }
+  if(op==='rev'){
+    const sum = a + b;
+    return {
+      h:'□を みつけるには、ぎゃくの けいさんを するよ',
+      e:'ぜんぶで '+sum+'、わかっているのが '+a+'<br>'+sum+'－'+a+'＝<b>'+ans+'</b>'
+    };
+  }
+  return {h:'', e:''};
+}
+
 function build(op, a, b, isAgain){
   let ans, text;
   if(op==='add'){ ans = a+b; text = a+' ＋ '+b+' ＝ <small>?</small>'; }
@@ -437,7 +518,8 @@ function build(op, a, b, isAgain){
     else{ ans = b; text = (a+b)+' − <small>□</small> ＝ '+a; }
   }
   else{ ans = a*a; text = a+' × '+a+' ＝ <small>?</small>'; }
-  return {op, a, b, ans, text, isAgain};
+  const hp = makeHelp(op, a, b, ans);
+  return {op, a, b, ans, text, isAgain, hint:hp.h, exp:hp.e};
 }
 
 function distractors(q){
@@ -467,6 +549,9 @@ function render(){
     ? 'この きょうかの ⭐は まんタン🈵 ほかの きょうかで あつめよう！'
     : 'したの4つからえらんでね';
   $('card').classList.toggle('is-again', cur.isAgain);
+  $('help-box').style.display = 'none';
+  $('hint-btn').style.display = cur.hint ? '' : 'none';
+  $('hint-btn').textContent = '💡 ヒント';
   const opts = [cur.ans, ...distractors(cur)];
   for(let i=opts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]]; }
   const el = $('choices');
@@ -514,6 +599,7 @@ function answer(btn, ok){
     if(i>=0){ againPool.splice(i,1); saveAgain(); }
     const res = GOHOUBI.award(()=>{ rwMini(); render(); }, 800, 'sansu', k);
     rwMini();
+    showExp();
     if(res.repeat) $('card-note').innerHTML = 'きょう もう せいかいした もんだいだよ😊<br>⭐は ふえないけど れんしゅうに なるよ';
     else if(res.capped) $('card-note').innerHTML = 'せいかい！でも この きょうかの ⭐は まんタン！<br>ほかの きょうかも やって あつめよう🎒';
     if(!res.shown) setTimeout(render, 950);
@@ -525,6 +611,7 @@ function answer(btn, ok){
     $('card').classList.add('shake');
     setTimeout(()=>$('card').classList.remove('shake'), 500);
     $('card-note').innerHTML = 'こたえは <span class="ans">' + cur.ans + '</span>！⭐が1こ へったよ。あとでもういっかい出すね💪';
+    showExp();
     if(!againPool.includes(k)){ againPool.unshift(k); saveAgain(); }
     const b = document.createElement('button');
     b.className = 'next-q';
@@ -535,6 +622,25 @@ function answer(btn, ok){
 }
 
 // ---- フィルタ・モード ----
+function showExp(){
+  if(!cur.exp) return;
+  $('hint-btn').style.display = 'none';
+  const el = $('help-box');
+  el.innerHTML = '<b>とき方</b><br>' + cur.exp;
+  el.style.display = '';
+}
+$('hint-btn').addEventListener('click', ()=>{
+  const el = $('help-box');
+  if(el.style.display === 'none'){
+    el.innerHTML = '<b>ヒント</b><br>' + cur.hint;
+    el.style.display = '';
+    $('hint-btn').textContent = '💡 とじる';
+  }else{
+    el.style.display = 'none';
+    $('hint-btn').textContent = '💡 ヒント';
+  }
+});
+
 document.querySelectorAll('#cat-filters button').forEach(b=>{
   b.addEventListener('click', ()=>{
     cat = b.dataset.c;
