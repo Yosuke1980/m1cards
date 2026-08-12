@@ -268,7 +268,7 @@ table.kuku td.diag{background:rgba(217,164,65,.22);color:var(--gold);font-weight
   </div>
 </div>
 
-<script src="gohoubi.js"></script>
+<script src="gohoubi.js?v=20260812c"></script>
 <script>
 // ---- サウンド（M-1カードと同じ自作効果音エンジン・外部音源なし） ----
 let sndOn = true;
@@ -463,7 +463,7 @@ function render(){
   $('score').innerHTML = 'せいかい ' + score + ' / ' + (qNo-1) +
     (streak>=2 ? '　<span style="color:#f0857c;">🔥' + streak + 'れんぞく</span>' : '');
   $('q-text').innerHTML = cur.text;
-  $('card-note').innerHTML = GOHOUBI.isCapped('sansu')
+  $('card-note').innerHTML = (GOHOUBI.isCapped||(()=>false))('sansu')
     ? 'この きょうかの ⭐は まんタン🈵 ほかの きょうかで あつめよう！'
     : 'したの4つからえらんでね';
   $('card').classList.toggle('is-again', cur.isAgain);

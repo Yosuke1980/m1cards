@@ -155,7 +155,7 @@ body.reward-mode .card,body.reward-mode .choices,body.reward-mode .filters,body.
 <div class="tables" id="hyo"></div>
 <div class="reward" id="reward"></div>
 
-<script src="gohoubi.js"></script>
+<script src="gohoubi.js?v=20260812c"></script>
 <script>
 // ---- おはなしデータ（話は画面に出さない＝きおくのテスト） ----
 const STORIES = [
@@ -395,7 +395,7 @@ document.querySelectorAll('.mode-toggle button').forEach(b=>{
     document.body.classList.toggle('hyo-mode', b.dataset.m==='hyo');
     document.body.classList.toggle('reward-mode', b.dataset.m==='reward');
     if(b.dataset.m!=='quiz') stopAudio();
-    if(b.dataset.m==='reward') GOHOUBI.renderPanel(document.getElementById('reward'));
+    if(b.dataset.m==='reward') (GOHOUBI.renderPanel||(()=>{}))(document.getElementById('reward'));
   });
 });
 
