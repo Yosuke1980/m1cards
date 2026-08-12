@@ -1181,6 +1181,150 @@ const DECK = [
 ],
 "en": null,
 "ena": "good night"
+},
+{
+"c": "かいわ⁺",
+"q": "<span class=\"pic\">💬</span>How many apples do you have?",
+"a": "I have three.",
+"alt": [
+"I'm three.",
+"Yes, I have.",
+"It's an apple."
+],
+"en": "How many apples do you have?",
+"ena": "I have three."
+},
+{
+"c": "かいわ⁺",
+"q": "<span class=\"pic\">💬</span>What time do you get up?",
+"a": "I get up at seven.",
+"alt": [
+"It's seven.",
+"I'm seven.",
+"Yes, I do."
+],
+"en": "What time do you get up?",
+"ena": "I get up at seven."
+},
+{
+"c": "かいわ⁺",
+"q": "<span class=\"pic\">💬</span>Why do you like summer?",
+"a": "Because I can swim.",
+"alt": [
+"Yes, I like summer.",
+"I'm summer.",
+"It's hot, thank you."
+],
+"en": "Why do you like summer?",
+"ena": "Because I can swim."
+},
+{
+"c": "かいわ⁺",
+"q": "<span class=\"pic\">💬</span>What are you doing?",
+"a": "I'm reading a book.",
+"alt": [
+"I read yesterday.",
+"I'm a book.",
+"Yes, I am doing."
+],
+"en": "What are you doing?",
+"ena": "I'm reading a book."
+},
+{
+"c": "かいわ⁺",
+"q": "<span class=\"pic\">💬</span>Where is my cap?",
+"a": "It's on the desk.",
+"alt": [
+"It's my cap.",
+"Yes, it is.",
+"I like your cap."
+],
+"en": "Where is my cap?",
+"ena": "It's on the desk."
+},
+{
+"c": "かいわ⁺",
+"q": "<span class=\"pic\">💬</span>Whose bag is this?",
+"a": "It's mine.",
+"alt": [
+"It's a bag.",
+"Yes, it is.",
+"I have a bag."
+],
+"en": "Whose bag is this?",
+"ena": "It's mine."
+},
+{
+"c": "かいわ⁺",
+"q": "<span class=\"pic\">💬</span>Can you play the piano?",
+"a": "Yes, I can.",
+"alt": [
+"Yes, I do.",
+"Yes, I am.",
+"I'm a piano."
+],
+"en": "Can you play the piano?",
+"ena": "Yes, I can."
+},
+{
+"c": "かいわ⁺",
+"q": "<span class=\"pic\">💬</span>What day is it today?",
+"a": "It's Monday.",
+"alt": [
+"It's sunny.",
+"It's ten.",
+"I'm fine."
+],
+"en": "What day is it today?",
+"ena": "It's Monday."
+},
+{
+"c": "かいわ⁺",
+"q": "<span class=\"pic\">💬</span>How's the weather today?",
+"a": "It's sunny.",
+"alt": [
+"It's Monday.",
+"I'm sunny.",
+"Yes, it does."
+],
+"en": "How's the weather today?",
+"ena": "It's sunny."
+},
+{
+"c": "かいわ⁺",
+"q": "<span class=\"pic\">💬</span>What do you want to be?",
+"a": "I want to be a doctor.",
+"alt": [
+"I'm a doctor.",
+"I want a doctor.",
+"Yes, I want."
+],
+"en": "What do you want to be?",
+"ena": "I want to be a doctor."
+},
+{
+"c": "かいわ⁺",
+"q": "<span class=\"pic\">💬</span>Do you have any brothers?",
+"a": "Yes, I have one brother.",
+"alt": [
+"Yes, I'm a brother.",
+"No, I have.",
+"I'm one."
+],
+"en": "Do you have any brothers?",
+"ena": "Yes, I have one brother."
+},
+{
+"c": "かいわ⁺",
+"q": "<span class=\"pic\">💬</span>Let's go to the park!",
+"a": "Sounds good!",
+"alt": [
+"I'm a park.",
+"Yes, I go park.",
+"Good night!"
+],
+"en": "Let's go to the park!",
+"ena": "Sounds good!"
 }
 ];
 
@@ -1213,7 +1357,7 @@ function pick(){
   return {i, again:false};
 }
 
-function ghMini(){ $('gh-mini').textContent = GOHOUBI.mini(); }
+function ghMini(){ $('gh-mini').textContent = GOHOUBI.mini('eigo'); }
 
 function render(){
   const p = pick();
@@ -1225,7 +1369,9 @@ function render(){
   ghMini();
   $('cat-badge').textContent = cur.c;
   $('q-text').innerHTML = cur.q;
-  $('card-note').textContent = cur.en ? '🔊カードをタップすると もういちど きけるよ' : 'したの4つからえらんでね';
+  $('card-note').innerHTML = GOHOUBI.isCapped('eigo')
+    ? 'この きょうかの ⭐は まんタン🈵 ほかの きょうかで あつめよう！'
+    : (cur.en ? '🔊カードをタップすると もういちど きけるよ' : 'したの4つからえらんでね');
   $('card').classList.toggle('is-again', cur.again);
   if(cur.en) setTimeout(()=>speak(cur.en), 400);
   const opts = [cur.a, ...cur.alt];

@@ -214,11 +214,13 @@ table.kuku td.diag{background:rgba(217,164,65,.22);color:var(--gold);font-weight
   <button data-c="sub">ひきざん −</button>
   <button data-c="mul">かけざん ×</button>
   <button data-c="sq">にじょう ²</button>
+  <button data-c="rev">ぎゃくざん □</button>
 </div>
 
 <div class="filters level" id="lv-filters">
   <button data-l="1" class="active">やさしい（1〜9）</button>
   <button data-l="2">むずかしい（〜20）</button>
+  <button data-l="3">ちょうむずかしい 🔥</button>
 </div>
 
 <div class="status">
@@ -396,18 +398,30 @@ function genQuestion(){
       return build(op, +a, +b, true);
     }
   }
-  const ops = cat==='mix' ? ['add','sub','mul','sq'] : [cat];
+  const ops = cat==='mix' ? ['add','sub','mul','sq','rev'] : [cat];
   const op = ops[ri(0, ops.length-1)];
   let a, b;
   if(op==='add'){
-    a = ri(1, lv===1?9:20); b = ri(1, lv===1?9:20);
+    if(lv===1){ a = ri(1,9); b = ri(1,9); }
+    else if(lv===2){ a = ri(1,20); b = ri(1,20); }
+    else { a = ri(11,40); b = ri(11,40); }            // ちょうむずかしい: 2けた＋2けた
   }else if(op==='sub'){
-    a = ri(2, lv===1?10:20); b = ri(1, a-1);
+    if(lv===1){ a = ri(2,10); b = ri(1,a-1); }
+    else if(lv===2){ a = ri(2,20); b = ri(1,a-1); }
+    else { a = ri(21,50); b = ri(2,a-2); }            // ちょうむずかしい: 2けたの ひきざん
   }else if(op==='mul'){
     if(lv===1){ a = ri(1,9); b = ri(1,9); }
-    else{ a = ri(2,20); b = ri(2, a>12 ? 9 : 20); if(Math.random()<0.5){const t=a;a=b;b=t;} }
+    else if(lv===2){ a = ri(2,20); b = ri(2, a>12 ? 9 : 20); if(Math.random()<0.5){const t=a;a=b;b=t;} }
+    else { a = ri(11,20); b = ri(6,20); if(Math.random()<0.5){const t=a;a=b;b=t;} }  // 13×17 級
+  }else if(op==='rev'){                               // □に入る数（ぎゃくざん）
+    if(lv===1){ a = ri(1,9); b = ri(1,9); }
+    else if(lv===2){ a = ri(1,20); b = ri(1,20); }
+    else { a = ri(11,40); b = ri(11,40); }
   }else{ // sq
-    a = ri(lv===1?1:11, lv===1?10:20); b = a;
+    if(lv===1){ a = ri(1,10); }
+    else if(lv===2){ a = ri(11,20); }
+    else { a = ri(13,25); }                           // ちょうむずかしい: 〜25の にじょう
+    b = a;
   }
   return build(op, a, b, false);
 }
@@ -417,6 +431,11 @@ function build(op, a, b, isAgain){
   if(op==='add'){ ans = a+b; text = a+' ＋ '+b+' ＝ <small>?</small>'; }
   else if(op==='sub'){ ans = a-b; text = a+' − '+b+' ＝ <small>?</small>'; }
   else if(op==='mul'){ ans = a*b; text = a+' × '+b+' ＝ <small>?</small>'; }
+  else if(op==='rev'){
+    // □に入る数をあてる。たしざん形と ひきざん形を半々で
+    if((a+b) % 2 === 0){ ans = b; text = a+' ＋ <small>□</small> ＝ '+(a+b); }
+    else{ ans = b; text = (a+b)+' − <small>□</small> ＝ '+a; }
+  }
   else{ ans = a*a; text = a+' × '+a+' ＝ <small>?</small>'; }
   return {op, a, b, ans, text, isAgain};
 }
@@ -444,7 +463,9 @@ function render(){
   $('score').innerHTML = 'せいかい ' + score + ' / ' + (qNo-1) +
     (streak>=2 ? '　<span style="color:#f0857c;">🔥' + streak + 'れんぞく</span>' : '');
   $('q-text').innerHTML = cur.text;
-  $('card-note').textContent = 'したの4つからえらんでね';
+  $('card-note').innerHTML = GOHOUBI.isCapped('sansu')
+    ? 'この きょうかの ⭐は まんタン🈵 ほかの きょうかで あつめよう！'
+    : 'したの4つからえらんでね';
   $('card').classList.toggle('is-again', cur.isAgain);
   const opts = [cur.ans, ...distractors(cur)];
   for(let i=opts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]]; }
@@ -540,7 +561,7 @@ document.querySelectorAll('.mode-toggle button').forEach(b=>{
 });
 
 // ---- ごほうび（共通ライブラリ gohoubi.js に接続） ----
-function rwMini(){ $('rw-mini').textContent = GOHOUBI.mini(); }
+function rwMini(){ $('rw-mini').textContent = GOHOUBI.mini('sansu'); }
 function renderReward(){
   const rw = GOHOUBI.state();
   let sr = '';

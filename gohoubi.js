@@ -83,7 +83,21 @@
   window.GOHOUBI = {
     state(){ return rw; },
     save,
-    mini(){ return '🏅' + rw.m + ' ⭐' + rw.s + '/10'; },
+    // 引数に教科キーを渡すと「その教科であと何こ貯められるか」も出す
+    mini(subject){
+      let t = '🏅' + rw.m + ' ⭐' + rw.s + '/10';
+      if(subject){
+        const used = (rw.subj && rw.subj[subject]) || 0;
+        t += used >= this.SUBJECT_CAP
+          ? '｜この きょうか まんタン🈵'
+          : '｜この きょうか ' + used + '/' + this.SUBJECT_CAP;
+      }
+      return t;
+    },
+    // その教科がもう上限に達しているか（出題前の案内に使う）
+    isCapped(subject){
+      return ((rw.subj && rw.subj[subject]) || 0) >= this.SUBJECT_CAP;
+    },
     // まちがえたら⭐が1こ減るだけ（連続でなくてOK・0未満にはならない。メダル/けんは減らない）
     miss(){ if(rw.s > 0){ rw.s--; save(); } },
     // スタンプ1こ加算（教科バランス制: 1枚のカードにつき同一教科の上限。10=実質制限なし）。
