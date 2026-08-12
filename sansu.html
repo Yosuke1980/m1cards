@@ -218,9 +218,9 @@ table.kuku td.diag{background:rgba(217,164,65,.22);color:var(--gold);font-weight
 </div>
 
 <div class="filters level" id="lv-filters">
-  <button data-l="1" class="active">やさしい（1〜9）</button>
-  <button data-l="2">むずかしい（〜20）</button>
-  <button data-l="3">ちょうむずかしい 🔥</button>
+  <button data-l="1">やさしい（〜12）</button>
+  <button data-l="2" class="active">ふつう（〜30）</button>
+  <button data-l="3">むずかしい 🔥</button>
 </div>
 
 <div class="status">
@@ -372,7 +372,7 @@ updSndBtn();
 
 // ---- 問題生成 ----
 const $ = id => document.getElementById(id);
-let cat = 'mix', lv = 1;
+let cat = 'mix', lv = 2;
 let qNo = 0, score = 0, streak = 0;
 let cur = null, locked = false;
 
@@ -402,25 +402,25 @@ function genQuestion(){
   const op = ops[ri(0, ops.length-1)];
   let a, b;
   if(op==='add'){
-    if(lv===1){ a = ri(1,9); b = ri(1,9); }
-    else if(lv===2){ a = ri(1,20); b = ri(1,20); }
-    else { a = ri(11,40); b = ri(11,40); }            // ちょうむずかしい: 2けた＋2けた
+    if(lv===1){ a = ri(2,12); b = ri(2,12); }
+    else if(lv===2){ a = ri(5,30); b = ri(5,30); }    // ふつう: くり上がりが必ず絡む
+    else { a = ri(21,99); b = ri(21,99); }            // むずかしい: 2けた＋2けた
   }else if(op==='sub'){
-    if(lv===1){ a = ri(2,10); b = ri(1,a-1); }
-    else if(lv===2){ a = ri(2,20); b = ri(1,a-1); }
-    else { a = ri(21,50); b = ri(2,a-2); }            // ちょうむずかしい: 2けたの ひきざん
+    if(lv===1){ a = ri(5,12); b = ri(1,a-1); }
+    else if(lv===2){ a = ri(12,30); b = ri(3,a-2); }
+    else { a = ri(31,99); b = ri(12,a-5); }
   }else if(op==='mul'){
-    if(lv===1){ a = ri(1,9); b = ri(1,9); }
-    else if(lv===2){ a = ri(2,20); b = ri(2, a>12 ? 9 : 20); if(Math.random()<0.5){const t=a;a=b;b=t;} }
+    if(lv===1){ a = ri(2,9); b = ri(2,9); }           // 九九（1の段は出さない）
+    else if(lv===2){ a = ri(3,20); b = ri(3, a>12 ? 9 : 20); if(Math.random()<0.5){const t=a;a=b;b=t;} }
     else { a = ri(11,20); b = ri(6,20); if(Math.random()<0.5){const t=a;a=b;b=t;} }  // 13×17 級
   }else if(op==='rev'){                               // □に入る数（ぎゃくざん）
-    if(lv===1){ a = ri(1,9); b = ri(1,9); }
-    else if(lv===2){ a = ri(1,20); b = ri(1,20); }
-    else { a = ri(11,40); b = ri(11,40); }
+    if(lv===1){ a = ri(2,12); b = ri(2,12); }
+    else if(lv===2){ a = ri(5,30); b = ri(5,30); }
+    else { a = ri(21,99); b = ri(21,99); }
   }else{ // sq
-    if(lv===1){ a = ri(1,10); }
+    if(lv===1){ a = ri(3,12); }
     else if(lv===2){ a = ri(11,20); }
-    else { a = ri(13,25); }                           // ちょうむずかしい: 〜25の にじょう
+    else { a = ri(13,25); }
     b = a;
   }
   return build(op, a, b, false);
