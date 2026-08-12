@@ -4,6 +4,7 @@
 // API: GOHOUBI.state() / GOHOUBI.save() / GOHOUBI.mini() / GOHOUBI.award(onClose) → 演出を出したらtrue
 (function(){
   const KEY = 'gohoubi-v1';
+  const SKEY = 'gohoubi-solved-v1';   // その日に正解ずみの問題（日付が変わると空になる）
   let rw = {s:0, m:0, t:[]};
   try{
     const s = localStorage.getItem(KEY);
@@ -14,6 +15,20 @@
     }
   }catch(e){}
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(rw)); }catch(e){} }
+
+  let solved = {d:'', k:{}};
+  try{
+    const sv = localStorage.getItem(SKEY);
+    if(sv) solved = JSON.parse(sv);
+  }catch(e){}
+  function today(){
+    const d = new Date();
+    return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+  }
+  function saveSolved(){ try{ localStorage.setItem(SKEY, JSON.stringify(solved)); }catch(e){} }
+  function rollDay(){
+    if(solved.d !== today()){ solved = {d:today(), k:{}}; saveSolved(); }
+  }
 
   const css = [
     '.gh-overlay{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(17,16,19,.93);padding:24px;}',
@@ -103,8 +118,21 @@
     // スタンプ1こ加算（教科バランス制: 1枚のカードにつき同一教科の上限。10=実質制限なし）。
     // 戻り値 {stamped, capped, shown}。shown=演出表示中（閉じたらonClose）。
     SUBJECT_CAP: 10,
-    award(onClose, delayMs, subject){
+    // qkey を渡すと「その日すでに正解した問題」ではスタンプが増えない（周回稼ぎ防止）
+    solvedToday(subject, qkey){
+      rollDay();
+      return !!solved.k[(subject||'etc') + '|' + qkey];
+    },
+    award(onClose, delayMs, subject, qkey){
       subject = subject || 'etc';
+      rollDay();
+      if(qkey !== undefined && qkey !== null){
+        const fk = subject + '|' + qkey;
+        if(solved.k[fk]){
+          return {stamped:false, repeat:true, capped:false, shown:false};
+        }
+        solved.k[fk] = 1; saveSolved();
+      }
       if(!rw.subj) rw.subj = {};
       if((rw.subj[subject] || 0) >= this.SUBJECT_CAP){
         return {stamped:false, capped:true, shown:false};
