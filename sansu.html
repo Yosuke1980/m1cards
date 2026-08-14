@@ -290,7 +290,7 @@ table.kuku td.diag{background:rgba(217,164,65,.22);color:var(--gold);font-weight
   </div>
 </div>
 
-<script src="gohoubi.js?v=20260812d"></script>
+<script src="gohoubi.js?v=20260814a"></script>
 <script>
 // ---- サウンド（M-1カードと同じ自作効果音エンジン・外部音源なし） ----
 let sndOn = true;
@@ -408,10 +408,22 @@ function saveAgain(){
   try{ localStorage.setItem('sansu-again', JSON.stringify(againPool.slice(0,60))); }catch(e){}
 }
 function keyOf(q){ return q.op + ':' + q.a + ':' + q.b; }
+// 「むずかしい問題」= レベル3 か、ぎゃくざん・にじょう
+// （やさしい計算だけを繰り返してメダルを取れないようにする）
+function isHardQ(q){ return lv >= 3 || q.op === 'rev' || q.op === 'sq'; }
 
 function ri(min, max){ return min + Math.floor(Math.random()*(max-min+1)); }
 
 function genQuestion(){
+  // 今日すでに正解した式は出さない。作り直しても出尽くしたらそのまま出す
+  for(let n = 0; n < 40; n++){
+    const q = genQuestionRaw();
+    if(!GOHOUBI.solvedToday || !GOHOUBI.solvedToday('sansu', keyOf(q))) return q;
+  }
+  return genQuestionRaw();
+}
+
+function genQuestionRaw(){
   // 35%の確率で「まちがえた問題」から再出題（同カテゴリ優先）
   if(againPool.length && Math.random() < 0.35){
     const pool = againPool.filter(k => cat==='mix' || k.startsWith(cat+':'));
@@ -597,7 +609,7 @@ function answer(btn, ok){
     // まちがいリストに入っていた問題に正解したら卒業
     const i = againPool.indexOf(k);
     if(i>=0){ againPool.splice(i,1); saveAgain(); }
-    const res = GOHOUBI.award(()=>{ rwMini(); render(); }, 800, 'sansu', k);
+    const res = GOHOUBI.award(()=>{ rwMini(); render(); }, 800, 'sansu', k, isHardQ(cur));
     rwMini();
     showExp();
     if(res.repeat) $('card-note').innerHTML = 'きょう もう せいかいした もんだいだよ😊<br>⭐は ふえないけど れんしゅうに なるよ';

@@ -101,6 +101,9 @@
     // 引数に教科キーを渡すと「その教科であと何こ貯められるか」も出す
     mini(subject){
       let t = '🏅' + rw.m + ' ⭐' + rw.s + '/10';
+      const hd = rw.hard || 0;
+      t += hd >= this.NEED_HARD ? '（🔥' + this.NEED_HARD + '/' + this.NEED_HARD + '）'
+                                : '（🔥' + hd + '/' + this.NEED_HARD + '）';
       if(subject){
         const used = (rw.subj && rw.subj[subject]) || 0;
         t += used >= this.SUBJECT_CAP
@@ -114,16 +117,19 @@
       return ((rw.subj && rw.subj[subject]) || 0) >= this.SUBJECT_CAP;
     },
     // まちがえたら⭐が1こ減るだけ（連続でなくてOK・0未満にはならない。メダル/けんは減らない）
-    miss(){ if(rw.s > 0){ rw.s--; save(); } },
+    miss(){ if(rw.s > 0){ rw.s--; if(rw.hard) rw.hard--; save(); } },
     // スタンプ1こ加算（教科バランス制: 1枚のカードにつき同一教科の上限。10=実質制限なし）。
     // 戻り値 {stamped, capped, shown}。shown=演出表示中（閉じたらonClose）。
     SUBJECT_CAP: 10,
+    NEED_HARD: 3,        // メダル1こに必要な「むずかしい問題」の数
     // qkey を渡すと「その日すでに正解した問題」ではスタンプが増えない（周回稼ぎ防止）
     solvedToday(subject, qkey){
       rollDay();
       return !!solved.k[(subject||'etc') + '|' + qkey];
     },
-    award(onClose, delayMs, subject, qkey){
+    // hard=true を渡すと「むずかしい問題」として数える。
+    // ⭐が10こ たまっても、むずかしいが NEED_HARD こに届くまでメダルにならない。
+    award(onClose, delayMs, subject, qkey, hard){
       subject = subject || 'etc';
       rollDay();
       if(qkey !== undefined && qkey !== null){
@@ -139,21 +145,28 @@
       }
       rw.subj[subject] = (rw.subj[subject] || 0) + 1;
       rw.s++;
+      if(hard) rw.hard = (rw.hard || 0) + 1;
       let kind = null;
-      if(rw.s >= 10){
-        rw.s = 0; rw.m++; rw.subj = {};
+      const needHard = this.NEED_HARD;
+      if(rw.s >= 10 && (rw.hard || 0) >= needHard){
+        rw.s = 0; rw.hard = 0; rw.subj = {};
+        rw.m++;
         kind = 'medal';
         if(rw.m % 3 === 0){
           rw.t.push({id:Date.now(), u:false});
           kind = 'ticket';
         }
+      }else if(rw.s > 10){
+        rw.s = 10;   // むずかしいが足りない間は 10 で止めて待たせる
       }
       save();
       if(kind){
         setTimeout(()=>overlay(kind, onClose), delayMs || 0);
         return {stamped:true, capped:false, shown:true};
       }
-      return {stamped:true, capped:false, shown:false};
+      const needMore = rw.s >= 10 && (rw.hard || 0) < this.NEED_HARD;
+      return {stamped:true, capped:false, shown:false, hard:!!hard,
+              needHard: needMore ? this.NEED_HARD - (rw.hard || 0) : 0};
     }
     ,
     // ごほうび画面（スタンプ・メダル・けん）を任意のコンテナに描画する共通部品
@@ -166,7 +179,9 @@
       const next = 3 - (rw.m % 3);
       let h = '<div class="rw-panel"><p class="rw-title">⭐ スタンプカード（れんぞくせいかいで たまる）</p>'+
         '<div class="stamp-row">'+sr+'</div>'+
-        '<p class="rw-note">⭐が10こ たまると メダル1こ！<br>まちがえると ⭐は1こ へるよ（メダルは へらない）</p>'+
+        '<p class="rw-note">⭐が10こ、そのうち <b style="color:#f0857c;">🔥むずかしい問題が' + this.NEED_HARD + 'こ</b> たまると メダル1こ！<br>'+
+        'いまの むずかしい: <b style="color:#f0857c;">' + (rw.hard || 0) + '/' + this.NEED_HARD + '</b><br>'+
+        'まちがえると ⭐は1こ へるよ（メダルは へらない）</p>'+
         (parts.length ? '<p class="rw-note">いまのカード: '+parts.join('・')+'</p>' : '')+'</div>';
       h += '<div class="rw-panel"><p class="rw-title">🏅 メダルだな</p>'+
         '<div class="medal-shelf">'+(rw.m ? '🏅'.repeat(Math.min(rw.m,30)) : 'まだないよ。クイズで あつめよう！')+'</div>'+

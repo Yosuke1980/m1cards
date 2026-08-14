@@ -168,7 +168,7 @@ body.reward-mode .card,body.reward-mode .choices,body.reward-mode .filters,body.
 <div class="tables" id="hyo"></div>
 <div class="reward" id="reward"></div>
 
-<script src="gohoubi.js?v=20260812d"></script>
+<script src="gohoubi.js?v=20260814a"></script>
 <script>
 // ---- サウンド（さんすうカードと同じ自作効果音・外部音源なし） ----
 let sndOn = true;
@@ -924,6 +924,9 @@ const DECK = [
 }
 ];
 
+const HARD_CATS = ["かんようく", "おなじおと", "しりとり", "おとのかず", "ことばのきまり"];
+function isHard(c){ return HARD_CATS.includes(c.c); }
+
 const $ = id => document.getElementById(id);
 let cat = 'all';
 let pool = [], idx = 0, qNo = 0, score = 0, streak = 0;
@@ -943,20 +946,32 @@ function buildPool(){
 }
 
 function pick(){
+  const solved = i => GOHOUBI.solvedToday && GOHOUBI.solvedToday('kokugo', i);
   if(againPool.length && Math.random() < 0.35){
-    const cand = againPool.filter(i => cat==='all' || DECK[i].c===cat);
+    const cand = againPool.filter(i => (cat==='all' || DECK[i].c===cat) && !solved(i));
     if(cand.length) return {i:cand[Math.floor(Math.random()*cand.length)], again:true};
   }
-  const i = pool[idx % pool.length];
-  idx++;
-  if(idx >= pool.length) buildPool();
-  return {i, again:false};
+  // 今日まだ正解していない問題だけを出す（同じ問題を何度も見せない）
+  for(let n=0; n<pool.length; n++){
+    const i = pool[idx % pool.length];
+    idx++;
+    if(!solved(i)) return {i, again:false};
+  }
+  return null;   // このカテゴリは今日ぶん終わり
 }
 
 function ghMini(){ $('gh-mini').textContent = GOHOUBI.mini('kokugo'); }
 
 function render(){
   const p = pick();
+  if(!p){
+    $('q-text').innerHTML = '<span class="pic">🎉</span>きょうの ぶんは ぜんぶ せいかいしたよ！';
+    $('card-note').innerHTML = 'ほかの きょうかを やってみよう。あしたに なると また あそべるよ';
+    $('choices').innerHTML = '';
+    $('cat-badge').textContent = 'かんりょう';
+    ghMini();
+    return;
+  }
   cur = {...DECK[p.i], i:p.i, again:p.again};
   locked = false; qNo++;
   $('counter').textContent = 'もんだい ' + qNo;
@@ -1011,7 +1026,7 @@ function answer(btn, ok){
     if(streak>=3){ confetti(streak>=5 ? 26 : 14); sndDon(); }
     const ai = againPool.indexOf(cur.i);
     if(ai>=0){ againPool.splice(ai,1); saveAgain(); }
-    const res = GOHOUBI.award(()=>{ ghMini(); render(); }, 800, 'kokugo', cur.i);
+    const res = GOHOUBI.award(()=>{ ghMini(); render(); }, 800, 'kokugo', cur.i, isHard(cur));
     ghMini();
     if(res.repeat) $('card-note').innerHTML = 'きょう もう せいかいした もんだいだよ😊<br>⭐は ふえないけど れんしゅうに なるよ';
     else if(res.capped) $('card-note').innerHTML = 'せいかい！でも この きょうかの ⭐は まんタン！<br>ほかの きょうかも やって あつめよう🎒';

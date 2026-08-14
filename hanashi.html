@@ -155,7 +155,7 @@ body.reward-mode .card,body.reward-mode .choices,body.reward-mode .filters,body.
 <div class="tables" id="hyo"></div>
 <div class="reward" id="reward"></div>
 
-<script src="gohoubi.js?v=20260812d"></script>
+<script src="gohoubi.js?v=20260814a"></script>
 <script>
 // ---- おはなしデータ（話は画面に出さない＝きおくのテスト） ----
 const STORIES = [
@@ -269,7 +269,32 @@ function ghMini(){ $('gh-mini').textContent = GOHOUBI.mini('hanashi'); }
 
 function story(){ return STORIES[order[sIdx % order.length]]; }
 
+function storyDone(si){
+  // その話の設問を今日ぜんぶ正解ずみか
+  const s = STORIES[order[si % order.length]];
+  if(!GOHOUBI.solvedToday) return false;
+  return s.qs.every((_, qi) => GOHOUBI.solvedToday('hanashi', (order[si % order.length]) + '-' + qi));
+}
+
+function skipDoneStories(){
+  for(let n = 0; n < order.length; n++){
+    if(!storyDone(sIdx)) return true;
+    sIdx++;
+  }
+  return false;   // ぜんぶ終わった
+}
+
 function showListen(){
+  if(!skipDoneStories()){
+    $('badge').textContent = 'かんりょう';
+    $('q-text').innerHTML = '<span class="pic">🎉</span>きょうの おはなしは ぜんぶ せいかいしたよ！';
+    $('card-note').textContent = 'ほかの きょうかを やってみよう。あしたに なると また あそべるよ';
+    $('listen-btn').style.display = 'none';
+    $('replay-btn').style.display = 'none';
+    $('choices').innerHTML = '';
+    ghMini();
+    return;
+  }
   const s = story();
   qIdx = 0; sScore = 0;
   $('counter').textContent = 'おはなし ' + (sIdx+1);
