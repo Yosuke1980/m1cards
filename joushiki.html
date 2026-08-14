@@ -171,7 +171,7 @@ body.reward-mode .card,body.reward-mode .choices,body.reward-mode .filters,body.
 <div class="tables" id="hyo"></div>
 <div class="reward" id="reward"></div>
 
-<script src="gohoubi.js?v=20260814a"></script>
+<script src="gohoubi.js?v=20260814b"></script>
 <script>
 // ---- サウンド（さんすうカードと同じ自作効果音・外部音源なし） ----
 let sndOn = true;
@@ -1286,12 +1286,16 @@ function answer(btn, ok){
     $('card').classList.add('flash');
     setTimeout(()=>$('card').classList.remove('flash'), 550);
     $('card-note').textContent = streak>=3 ? '🔥 ' + streak + 'れんぞくせいかい！' : 'せいかい！🎉';
+    const st = GOHOUBI.state();
     if(streak>=3){ confetti(streak>=5 ? 26 : 14); sndDon(); }
     const ai = againPool.indexOf(cur.i);
     if(ai>=0){ againPool.splice(ai,1); saveAgain(); }
     const res = GOHOUBI.award(()=>{ ghMini(); render(); }, 800, 'joushiki', cur.i, isHard(cur));
     ghMini();
-    if(res.repeat) $('card-note').innerHTML = 'きょう もう せいかいした もんだいだよ😊<br>⭐は ふえないけど れんしゅうに なるよ';
+    if(res.stamped) $('card-note').innerHTML =
+      (res.hard ? '🔥 むずかしい問題 せいかい！<br>' : 'せいかい！🎉<br>') +
+      '<span style="color:var(--gold);font-weight:900;">⭐ スタンプ ゲット！ ' + GOHOUBI.state().s + '/10</span>';
+    else if(res.repeat) $('card-note').innerHTML = 'きょう もう せいかいした もんだいだよ😊<br>⭐は ふえないけど れんしゅうに なるよ';
     else if(res.capped) $('card-note').innerHTML = 'せいかい！でも この きょうかの ⭐は まんタン！<br>ほかの きょうかも やって あつめよう🎒';
     if(!res.shown) setTimeout(render, 950);
   }else{

@@ -39,6 +39,12 @@
     '.gh-box .gh-sub{font-size:14px;color:#a49e94;line-height:1.9;}',
     '.gh-box button{margin-top:18px;font-family:inherit;font-size:15px;font-weight:700;padding:12px 30px;border-radius:999px;border:none;background:#d1352b;color:#fff;cursor:pointer;}',
     '.gh-conf{position:fixed;top:-16px;z-index:70;pointer-events:none;border-radius:2px;animation:ghFall linear forwards;}',
+    '.gh-stamp{position:fixed;left:50%;top:36%;z-index:50;pointer-events:none;text-align:center;font-family:inherit;animation:ghStamp 1.4s ease forwards;}',
+    '.gh-stamp .gh-star{font-size:96px;line-height:1;filter:drop-shadow(0 0 24px rgba(217,164,65,.9));}',
+    '.gh-stamp .gh-got{font-size:26px;font-weight:900;color:#d9a441;margin-top:6px;text-shadow:0 2px 12px rgba(0,0,0,.9);}',
+    '.gh-stamp .gh-cnt{font-size:20px;font-weight:900;color:#f2efe9;margin-top:4px;text-shadow:0 2px 12px rgba(0,0,0,.9);}',
+    '.gh-stamp .gh-hard{font-size:17px;font-weight:900;color:#f0857c;margin-top:6px;text-shadow:0 2px 12px rgba(0,0,0,.9);}',
+    '@keyframes ghStamp{0%{transform:translate(-50%,-50%) scale(.3);opacity:0;}22%{transform:translate(-50%,-50%) scale(1.18);opacity:1;}55%{transform:translate(-50%,-50%) scale(1);opacity:1;}100%{transform:translate(-50%,-170%) scale(.55);opacity:0;}}',
     '@keyframes ghFall{to{transform:translateY(108vh) rotate(720deg);opacity:.85;}}',
     '.rw-panel{background:#1c1a1f;border:1px solid #38343d;border-radius:12px;padding:20px;margin-bottom:14px;box-shadow:0 0 0 1px rgba(217,164,65,.28);}',
     '.rw-title{font-size:16px;font-weight:900;color:#d9a441;margin-bottom:14px;}',
@@ -70,6 +76,19 @@
       document.body.appendChild(s);
       setTimeout(()=>s.remove(), 3200);
     }
+  }
+
+  function stampPop(hard){
+    const d = document.createElement('div');
+    d.className = 'gh-stamp';
+    d.innerHTML =
+      '<div class="gh-star">⭐</div>' +
+      '<div class="gh-got">スタンプ ゲット！</div>' +
+      '<div class="gh-cnt">' + rw.s + ' / 10</div>' +
+      (hard ? '<div class="gh-hard">🔥 むずかしい問題！ ' +
+              (rw.hard || 0) + '/' + window.GOHOUBI.NEED_HARD + '</div>' : '');
+    document.body.appendChild(d);
+    setTimeout(() => d.remove(), 1450);
   }
 
   function overlay(kind, onClose){
@@ -164,6 +183,7 @@
         setTimeout(()=>overlay(kind, onClose), delayMs || 0);
         return {stamped:true, capped:false, shown:true};
       }
+      stampPop(!!hard);
       const needMore = rw.s >= 10 && (rw.hard || 0) < this.NEED_HARD;
       return {stamped:true, capped:false, shown:false, hard:!!hard,
               needHard: needMore ? this.NEED_HARD - (rw.hard || 0) : 0};
