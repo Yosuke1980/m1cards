@@ -58,6 +58,9 @@
     '.ticket.used{opacity:.4;border-color:#38343d;background:none;}',
     '.ticket button{font-family:inherit;font-size:13px;font-weight:700;padding:9px 16px;border-radius:8px;border:1px solid #d9a441;background:transparent;color:#d9a441;cursor:pointer;}',
     '.ticket.used button{border-color:#38343d;color:#a49e94;cursor:default;}',
+    '.gh-sync textarea{width:100%;height:64px;font-family:inherit;font-size:13px;line-height:1.6;padding:8px;border-radius:8px;border:1px solid #38343d;background:#111013;color:#f2efe9;resize:vertical;}',
+    '.gh-sync button{font-family:inherit;font-size:14px;font-weight:700;padding:10px 18px;border-radius:8px;border:1px solid #d9a441;background:transparent;color:#d9a441;cursor:pointer;margin:8px 6px 0 0;}',
+    '.gh-sync .gh-msg{font-size:13px;line-height:1.9;color:#a49e94;margin-top:8px;}',
   ].join('\n');
   const st = document.createElement('style');
   st.textContent = css;
@@ -112,6 +115,35 @@
       if(isTicket) setTimeout(window.sndKaboom, 700);
     }
     o.querySelector('button').addEventListener('click', ()=>{ o.remove(); if(onClose) onClose(); });
+  }
+
+  // 別の端末と記録を合わせるためのコード（記録をそのまま文字にしたもの）
+  function makeCode(){
+    const data = {m: rw.m || 0, s: rw.s || 0, hard: rw.hard || 0,
+                  t: (rw.t || []).length, u: (rw.t || []).filter(x => x.u).length};
+    return btoa(JSON.stringify(data)).replace(/=+$/, '');
+  }
+  function readCode(code){
+    // 多いほうに合わせる（減ることはない）
+    let d;
+    try{
+      d = JSON.parse(atob(String(code || '').trim().replace(/\s+/g, '')));
+    }catch(e){ return null; }
+    if(typeof d.m !== 'number') return null;
+    const before = {m: rw.m || 0, t: (rw.t || []).length};
+    rw.m = Math.max(rw.m || 0, d.m || 0);
+    rw.s = Math.max(rw.s || 0, d.s || 0);
+    rw.hard = Math.max(rw.hard || 0, d.hard || 0);
+    const want = Math.max((rw.t || []).length, d.t || 0);
+    rw.t = rw.t || [];
+    while(rw.t.length < want) rw.t.push({id: 0, u: false});
+    // つかった枚数も多いほうに合わせる
+    const usedNow = rw.t.filter(x => x.u).length;
+    let needUsed = Math.max(usedNow, d.u || 0) - usedNow;
+    for(const tk of rw.t){ if(needUsed <= 0) break; if(!tk.u){ tk.u = true; needUsed--; } }
+    save();
+    return {medalBefore: before.m, medalNow: rw.m,
+            ticketBefore: before.t, ticketNow: rw.t.length};
   }
 
   window.GOHOUBI = {
@@ -189,6 +221,7 @@
               needHard: needMore ? this.NEED_HARD - (rw.hard || 0) : 0};
     }
     ,
+    makeCode, readCode,
     // ごほうび画面（スタンプ・メダル・けん）を任意のコンテナに描画する共通部品
     renderPanel(el){
       const names = {sansu:'さんすう', eigo:'えいご', kokugo:'こくご', joushiki:'じょうしき', hanashi:'おはなし', hakken:'はっけん', etc:'そのほか'};
@@ -207,9 +240,32 @@
         '<div class="medal-shelf">'+(rw.m ? '🏅'.repeat(Math.min(rw.m,30)) : 'まだないよ。クイズで あつめよう！')+'</div>'+
         '<p class="medal-count">メダル '+rw.m+' こ'+(rw.m ? '（あと'+next+'こで ごほうびけん！）' : '')+'</p>'+
         '<p class="rw-note">メダル3こで「ごほうびけん」1まい！</p></div>';
+      h += '<div class="rw-panel gh-sync"><p class="rw-title">📱 ほかの きかいと きろくを あわせる</p>'+
+        '<p class="rw-note">iPadと iPhoneなど、べつの きかいで あそぶと きろくが わかれてしまいます。'+
+        'こちらで「コードを つくる」→ もう一方で はりつけると、<b style="color:#d9a441;">メダルの 多いほうに そろいます</b>（へることは ありません）。</p>'+
+        '<button class="gh-mk">コードを つくる</button>'+
+        '<textarea class="gh-code" placeholder="ここに コードが 出ます／ほかの きかいの コードを はりつけて ください"></textarea>'+
+        '<button class="gh-ld">はりつけた コードを よみこむ</button>'+
+        '<p class="gh-msg"></p></div>';
       h += '<div class="rw-panel"><p class="rw-title">🎫 ごほうびけん</p><div class="gh-tickets"></div>'+
         '<p class="rw-note">おうちのひとに みせて、ごほうびと こうかんしよう！<br>（なにと こうかんできるかは おうちのひとが きめるよ）</p></div>';
       el.innerHTML = h;
+      const ta = el.querySelector('.gh-code');
+      const msg = el.querySelector('.gh-msg');
+      el.querySelector('.gh-mk').addEventListener('click', () => {
+        ta.value = makeCode();
+        ta.select();
+        msg.textContent = 'このコードを、もう一方の きかいの おなじ ところに はりつけてね。';
+      });
+      el.querySelector('.gh-ld').addEventListener('click', () => {
+        const r = readCode(ta.value);
+        if(!r){ msg.textContent = 'コードが よめませんでした。もういちど コピーしてね。'; return; }
+        msg.innerHTML = 'あわせました！ メダル ' + r.medalBefore + ' → <b style="color:#d9a441;">' +
+          r.medalNow + '</b>こ／けん ' + r.ticketBefore + ' → <b style="color:#d9a441;">' +
+          r.ticketNow + '</b>まい';
+        window.GOHOUBI.renderPanel(el);
+      });
+
       const tl = el.querySelector('.gh-tickets');
       if(!rw.t.length){ tl.innerHTML = '<p class="rw-note">まだないよ。メダル3こで 1まい もらえるよ！</p>'; }
       else{

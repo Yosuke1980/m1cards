@@ -270,27 +270,12 @@ table.kuku td.diag{background:rgba(217,164,65,.22);color:var(--gold);font-weight
   </div>
 </div>
 
-<div class="reward">
-  <div class="rw-panel">
-    <p class="rw-title">⭐ スタンプカード（れんぞくせいかいで たまる）</p>
-    <div class="stamp-row" id="stamp-row"></div>
-    <p class="rw-note">⭐が10こ たまると メダル1こ！<br>まちがえると ⭐は1こ へるよ（メダルは へらない）</p>
-    <p class="rw-note" id="balance-note"></p>
-  </div>
-  <div class="rw-panel">
-    <p class="rw-title">🏅 メダルだな</p>
-    <div class="medal-shelf" id="medal-shelf"></div>
-    <p class="medal-count" id="medal-count"></p>
-    <p class="rw-note">メダル3こで「ごほうびけん」1まい！</p>
-  </div>
-  <div class="rw-panel">
-    <p class="rw-title">🎫 ごほうびけん</p>
-    <div id="ticket-list"></div>
+<div class="reward" id="reward"></div>
     <p class="rw-note">おうちのひとに みせて、ごほうびと こうかんしよう！<br>（なにと こうかんできるかは おうちのひとが きめるよ）</p>
   </div>
 </div>
 
-<script src="gohoubi.js?v=20260815b"></script>
+<script src="gohoubi.js?v=20260815c"></script>
 <script>
 // ---- サウンド（M-1カードと同じ自作効果音エンジン・外部音源なし） ----
 let sndOn = true;
@@ -686,37 +671,8 @@ document.querySelectorAll('.mode-toggle button').forEach(b=>{
 // ---- ごほうび（共通ライブラリ gohoubi.js に接続） ----
 function rwMini(){ $('rw-mini').textContent = GOHOUBI.mini('sansu'); }
 function renderReward(){
-  const rw = GOHOUBI.state();
-  let sr = '';
-  for(let i=0;i<10;i++) sr += '<div class="stamp'+(i<rw.s?' on':'')+'">'+(i<rw.s?'⭐':'')+'</div>';
-  $('stamp-row').innerHTML = sr;
-  const names = {sansu:'さんすう', eigo:'えいご', kokugo:'こくご', joushiki:'じょうしき', hanashi:'おはなし', hakken:'はっけん', etc:'そのほか'};
-  const subj = rw.subj || {};
-  const parts = Object.keys(subj).map(k=>(names[k]||k)+' '+subj[k]+'こ');
-  const bal = document.getElementById('balance-note');
-  if(bal) bal.innerHTML = parts.length ? 'いまのカード: ' + parts.join('・') : '';
-  $('medal-shelf').textContent = rw.m ? '🏅'.repeat(Math.min(rw.m, 30)) : 'まだないよ。クイズで あつめよう！';
-  const next = 3 - (rw.m % 3);
-  $('medal-count').textContent = 'メダル ' + rw.m + ' こ' + (rw.m ? '（あと' + next + 'こで ごほうびけん！）' : '');
-  const tl = $('ticket-list');
-  if(!rw.t.length){ tl.innerHTML = '<p class="rw-note">まだないよ。メダル3こで 1まい もらえるよ！</p>'; }
-  else{
-    tl.innerHTML = '';
-    [...rw.t].reverse().forEach(tk=>{
-      const d = document.createElement('div');
-      d.className = 'ticket' + (tk.u ? ' used' : '');
-      d.innerHTML = '<span>🎫 ごほうびけん</span>';
-      const b = document.createElement('button');
-      b.textContent = tk.u ? 'つかったよ' : 'つかう';
-      if(!tk.u) b.addEventListener('click', ()=>{
-        if(confirm('ごほうびと こうかんした？（おうちのひとと いっしょにおしてね）')){
-          tk.u = true; GOHOUBI.save(); renderReward();
-        }
-      });
-      d.appendChild(b);
-      tl.appendChild(d);
-    });
-  }
+  // 表示は gohoubi.js の共通部品に任せる（他の教科と同じ見た目・引っこし欄つき）
+  GOHOUBI.renderPanel($('reward'));
 }
 rwMini();
 if(location.hash === '#gohoubi'){
