@@ -86,6 +86,12 @@ body.reward-mode .card,body.reward-mode .choices,body.reward-mode .filters,body.
 .q-text .pic{font-size:64px;display:block;margin-bottom:6px;line-height:1.3;}
 .card-note{font-size:13px;color:var(--text-dim);margin-top:14px;line-height:1.8;}
 .card-note .ans{color:var(--gold);font-weight:900;font-size:20px;}
+.exp-box{
+  margin-top:12px;padding:11px 14px;border-radius:10px;
+  background:rgba(217,164,65,.10);border:1px solid rgba(217,164,65,.35);
+  font-size:15px;line-height:2;color:var(--text);text-align:left;max-width:560px;
+}
+.exp-box b{color:var(--gold);}
 .again-tag{
   position:absolute;top:12px;left:14px;font-size:12px;font-weight:700;color:#f0857c;
   border:1px solid #e2483d;border-radius:4px;padding:3px 10px;display:none;
@@ -160,6 +166,7 @@ body.reward-mode .card,body.reward-mode .choices,body.reward-mode .filters,body.
   <span class="badge" id="cat-badge"></span>
   <p class="q-text" id="q-text"></p>
   <p class="card-note" id="card-note">したの4つからえらんでね</p>
+  <div class="exp-box" id="exp-box" style="display:none;"></div>
 </div>
 
 <div class="choices" id="choices"></div>
@@ -167,7 +174,7 @@ body.reward-mode .card,body.reward-mode .choices,body.reward-mode .filters,body.
 <div class="tables" id="hyo"></div>
 <div class="reward" id="reward"></div>
 
-<script src="gohoubi.js?v=20260815a"></script>
+<script src="gohoubi.js?v=20260815b"></script>
 <script>
 // ---- サウンド（さんすうカードと同じ自作効果音・外部音源なし） ----
 let sndOn = true;
@@ -1493,6 +1500,7 @@ function render(){
     ? 'この きょうかの ⭐は まんタン🈵 ほかの きょうかで あつめよう！'
     : ('したの4つからえらんでね');
   $('card').classList.toggle('is-again', cur.again);
+  $('exp-box').style.display = 'none';
   const opts = [cur.a, ...cur.alt];
   for(let i=opts.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [opts[i],opts[j]]=[opts[j],opts[i]]; }
   const el = $('choices');
@@ -1522,6 +1530,10 @@ function confetti(n){
 function answer(btn, ok){
   if(locked) return;
   locked = true;
+  if(cur.exp){
+    $('exp-box').innerHTML = '<b>💡 かいせつ</b><br>' + cur.exp;
+    $('exp-box').style.display = '';
+  }
   [...$('choices').children].forEach(b=>{
     b.disabled = true;
     if(b.textContent === cur.a) b.classList.add('correct');
